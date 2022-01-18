@@ -145,7 +145,7 @@ export class Crawler {
         } else {
             /*
                斗鱼每个房间获取房间信息的请求方式随机变换，GET 和 POST 都有可能，
-               所以这里请求失败时修改
+               所以这里请求失败时修改，但也只修改一次请求方式，如果仍失败就需要重新执行
             */
             this.isPost = !this.isPost
             const info = await this.series()
