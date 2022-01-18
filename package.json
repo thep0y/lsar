@@ -7,7 +7,11 @@
   "author": "thepoy <thepoy@163.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && node ./dist/main.js"
+    "dev": "tsc && node ./dist/main.js",
+    "build": "rm -rf ./dist && tsc && sed -i '1i\\#!/usr/bin/env node' ./dist/main.js && chmod +x ./dist/main.js && yarn link"
+  },
+  "bin": {
+    "live": "./dist/main.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
