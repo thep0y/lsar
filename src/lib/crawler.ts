@@ -129,6 +129,15 @@ export class Crawler {
     }
 
     private async getLiveName() {
+        /*
+            码率或清晰度
+                - 900 高清
+                - 2000 超清
+                - 4000 蓝光 4 M
+                - 更高 主播可以自己设置更高的码率，没有固定值，但是可以获取到具体值，使用flv名不加码率时会自动使用最高码率播放
+            添加码率后的文件名为 {name}_{bit}.flv 或 {name}_{bit}.xs，
+            不添加码率就会播放最高码率
+        */
         const info = await this.series()
         let link_name = ''
         if (info) {
