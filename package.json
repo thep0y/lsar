@@ -1,0 +1,26 @@
+{
+  "name": "live-stream",
+  "version": "1.0.0",
+  "description": "一个获取直播流地址的工具",
+  "main": "./dist/main.js",
+  "repository": "https://gitee.com:thepoy/live-stream",
+  "author": "thepoy <thepoy@163.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc && node ./dist/main.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "superagent": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.9",
+    "@types/superagent": "^4.1.14",
+    "@typescript-eslint/eslint-plugin": "",
+    "@typescript-eslint/parser": "",
+    "typescript": "",
+    "eslint": "",
+    "eslint-plugin": "",
+    "eslint-plugin-eslint-plugin": ""
+  }
+}

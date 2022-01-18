@@ -1,0 +1,54 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": [
+            "tsconfig.json"
+        ]
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    ],
+    "plugins": [
+        "eslint-plugin",
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "@typescript-eslint/no-unused-vars": [
+            "error"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "comma-dangle": [
+            "error",
+            "never"
+        ],
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 1,
+                "maxEOF": 0,
+                "maxBOF": 0
+            }
+        ],
+        "array-element-newline": [
+            "error",
+            {
+                "multiline": true,
+                "minItems": 3
+            }
+        ],
+        "array-bracket-newline": [
+            "error",
+            {
+                "multiline": true,
+                "minItems": 3
+            }
+        ],
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "no-trailing-spaces": "error"
+    }
+}
