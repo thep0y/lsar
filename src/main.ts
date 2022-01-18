@@ -1,7 +1,12 @@
 import { Crawler } from './lib/crawler';
 
-// const c = new Crawler(675429, true, 'https://www.douyu.com/topic/jnhqngs?rid=675429')
-const c = new Crawler(100)
-c.printLiveLink().then().catch((e) => {
-    console.log(e)
-})
+if (process.argv.length < 3) {
+    console.log('需要传入房间号')
+} else {
+    const roomID = process.argv.slice(2)[0]
+    const c = new Crawler(parseInt(roomID))
+    // const c = new Crawler(4615502)
+    c.printLiveLink().then().catch((e) => {
+        console.log(e)
+    })
+}

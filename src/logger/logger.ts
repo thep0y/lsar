@@ -30,16 +30,28 @@ export class Color {
     }
 }
 
+export enum LoggerLevel {
+    DEBUG = 1,
+    INFO,
+    WARN,
+    ERROR,
+    FATAL,
+}
+
+type T = string | number | Error | object
+
 /**
  * 彩色日志
  */
 export class Logger {
     private color: Color
     private addDate = false
+    private level: LoggerLevel
 
-    constructor(addDate = false, color = new Color()) {
+    constructor(addDate = false, color = new Color(), level = LoggerLevel.WARN) {
         this.addDate = addDate
         this.color = color
+        this.level = level
     }
 
     private _time(): string {
@@ -81,34 +93,44 @@ export class Logger {
         return this.color.gray(`${hour}:${min}:${sec}.${mils}`)
     }
 
-    debug(...msgs: string[]) {
-        let msg = `${this._time()} [${this.color.purple('DEBUG')}]`
+    private mergeMsgs(msg: string, msgs: T[]): string {
         msgs.forEach(v => {
-            msg += ' ' + v
+            msg += ' ' + v.toString()
         })
-
-        console.log(msg)
+        return msg
     }
 
-    info(...msgs: string[]) {
-        let msg = `${this._time()} [${this.color.green('INFO')}] `
-        msgs.forEach(v => {
-            msg += ' ' + v
-        })
-
-        console.log(msg)
+    debug(...msgs: T[]) {
+        if (LoggerLevel.DEBUG >= this.level) {
+            const msg = `${this._time()} [${this.color.purple('DEBUG')}]`
+            console.log(this.mergeMsgs(msg, msgs))
+        }
     }
 
-    error(msg: Error | string) {
-        console.log(`${this._time()} [${this.color.red('ERROR')}] ${msg.toString()}`)
+    info(...msgs: T[]) {
+        if (LoggerLevel.INFO >= this.level) {
+            const msg = `${this._time()} [${this.color.green('INFO')}]`
+            console.log(this.mergeMsgs(msg, msgs))
+        }
     }
 
-    warn(msg: Error | string) {
-        console.log(`${this._time()} [${this.color.yellow('WARNING')}] ${msg.toString()}`)
+    error(...msgs: T[]) {
+        if (LoggerLevel.ERROR >= this.level) {
+            const msg = `${this._time()} [${this.color.red('ERROR')}]`
+            console.log(this.mergeMsgs(msg, msgs))
+        }
     }
 
-    fatal(msg: Error | string) {
-        console.log(`${this._time()} [${this.color.red('FATAL')}] ${msg.toString()}`)
+    warn(...msgs: T[]) {
+        if (LoggerLevel.WARN >= this.level) {
+            const msg = `${this._time()} [${this.color.yellow('WARNING')}]`
+            console.log(this.mergeMsgs(msg, msgs))
+        }
+    }
+
+    fatal(...msgs: T[]) {
+        const msg = `${this._time()} [${this.color.red('FATAL')}]`
+        console.log(this.mergeMsgs(msg, msgs))
         process.exit(1)
     }
 }

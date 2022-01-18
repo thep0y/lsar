@@ -15,60 +15,72 @@ interface Info {
 
 export class Crawler {
     private rid: number
-    private isLiangHao: boolean
+    private isPost = false
     private roomURL: string
     private ub98484234Reg = new RegExp(/var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/)
-    // private ub98484234Reg = new RegExp(/function ub98484234.*?function q7cad0d5d91/)
 
-    constructor(rid: number, isLiangHao = false, roomURL = '') {
+    constructor(rid: number) {
         this.rid = rid
-        this.isLiangHao = isLiangHao
-        if (this.isLiangHao) {
-            if (!roomURL) {
-                logger.fatal('靓号房间需要输入链接，因为在不同的区可能会存在相同的靓号，故而无法正确解析')
-            }
-            this.roomURL = roomURL
-        } else {
-            this.roomURL = 'https://www.douyu.com/' + rid.toString()
-        }
+        this.roomURL = 'https://www.douyu.com/' + rid.toString()
     }
 
-    private async get(url: string) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    private async get(url: string): Promise<string> {
         logger.debug('GET 正在访问的链接：', url)
-        const resp = await get(url).timeout({
-            response: 5000,
-            deadline: 60000
-        })
-        if (resp.statusCode === 200) {
-            return resp.text
-        } else {
-            console.log(resp.statusCode)
-            throw '状态码不对'
+        try {
+            const resp = await get(url).timeout({
+                response: 5000,
+                deadline: 60000
+            })
+            if (resp.statusCode === 200) {
+                return resp.text
+            } else {
+                logger.fatal('状态码不对', resp.statusCode)
+            }
+        } catch (e) {
+            logger.error((e as Error).message)
+            return ''
         }
     }
 
-    private async post(url: string, params: string) {
-        const resp = await post(url).timeout({
-            response: 5000,
-            deadline: 60000
-        }).type('form').send(params)
-        if (resp.statusCode === 200) {
-            return resp.text
-        } else {
-            console.log(resp.statusCode)
-            throw '状态码不对'
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    private async post(url: string, params: string): Promise<string> {
+        logger.debug('POST 正在访问的链接：', url, '使用的参数', params)
+        try {
+            const resp = await post(url).timeout({
+                response: 5000,
+                deadline: 60000
+            }).type('form').send(params)
+            if (resp.statusCode === 200) {
+                return resp.text
+            } else {
+                logger.fatal('状态码不对', resp.statusCode)
+            }
+        } catch (e) {
+            logger.error((e as Error).message)
+            return ''
         }
     }
 
-    private async getRoomInfo(params: string) {
+    private async getRoomInfo(params: string): Promise<Info | null> {
         let url = ''
         let resp = ''
-        if (this.isLiangHao) {
+        if (this.isPost) {
             url = `https://www.douyu.com/lapi/live/getH5Play/${this.rid}`
             resp = await this.post(url, params)
+            if (!resp) {
+                logger.warn('响应异常，更换 GET 请求重试')
+                return null
+            }
         } else {
             url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.rid}?${params}`
             resp = await this.get(url)
+            if (!resp) {
+                logger.warn('响应异常，更换 POST 请求重试')
+                return null
+            }
         }
         const info = JSON.parse(resp) as Info
         return info
@@ -107,14 +119,33 @@ export class Crawler {
         return signFunc
     }
 
-    private async getLiveName() {
+    private async series() {
         const ts = Math.floor((new Date).getTime() / 1e3)
         const html = await this.getRoomPage()
         const signFunc = this.matchSignFunc(html)
         const params = this.createParams(signFunc, ts)
         const info = await this.getRoomInfo(params)
-        console.log(info)
-        const link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
+        return info
+    }
+
+    private async getLiveName() {
+        const info = await this.series()
+        let link_name = ''
+        if (info) {
+            link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
+        } else {
+            /*
+               斗鱼每个房间获取房间信息的请求方式随机变换，GET 和 POST 都有可能，
+               所以这里请求失败时修改
+            */
+            this.isPost = !this.isPost
+            const info = await this.series()
+            if (!info) {
+                logger.fatal('更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序')
+            } else {
+                link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
+            }
+        }
         return link_name
     }
 
@@ -132,6 +163,7 @@ export class Crawler {
         console.log(color.yellow('flv'), '链接：')
         console.log(color.gray(flv_link), '\n')
         console.log(color.yellow('x-p2p'), '链接：')
-        console.log(color.gray(x_p2p_link), '\n')
+        console.log(color.gray(x_p2p_link))
+        console.log('\n')
     }
 }
