@@ -1,23 +1,38 @@
 # Live Stream
 
 #### 介绍
-斗鱼、B站直播源链接
-
-#### 软件架构
-软件架构说明
+斗鱼直播源链接
 
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. **安装依赖**
+
+   克隆
+
+   ```bash
+   git clone https://gitee.com/thepoy/live-stream
+   ```
+
+   并进入项目目录后
+
+   ```bash
+   yarn
+   ```
+
+2. **编绎安装**
+
+   ```bash
+   yarn build
+   ```
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+当前只完成了斗鱼直播源的获取，因为我偶尔用斗鱼看看直播，其他平台暂无需求，留待以后更新。
+
+编绎安装后在 yarn 的全局 bin 目录中会有一个`live`命令，传入房间号即可解析出直播源：
+
+![image-20220118232002490](https://s4.ax1x.com/2022/01/18/7BoYyn.png)
 
 #### 参与贡献
 
@@ -25,13 +40,3 @@
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
