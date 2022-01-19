@@ -4,7 +4,7 @@ import { log } from './logger/logger'
 
 const mainPath = './dist/main.js'
 
-const isLinux = os.platform() == 'linux'
+const isWindows = os.platform() == 'win32'
 
 fs.readFile(mainPath, (err, data) => {
     if (err) log.fatal(err)
@@ -15,7 +15,7 @@ fs.readFile(mainPath, (err, data) => {
     })
 })
 
-if (isLinux) {
+if (!isWindows) {
     fs.open(mainPath, 'r', (err, fd) => {
         if (err) log.fatal(err)
 
