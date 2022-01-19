@@ -34,12 +34,13 @@ export class Crawler {
                 deadline: 60000
             })
             if (resp.statusCode === 200) {
+                logger.debug('响应成功')
                 return resp.text
             } else {
                 logger.fatal('状态码不对', resp.statusCode)
             }
         } catch (e) {
-            logger.error((e as Error).message)
+            logger.error('请求出错', (e as Error).message)
             return ''
         }
     }
@@ -59,7 +60,7 @@ export class Crawler {
                 logger.fatal('状态码不对', resp.statusCode)
             }
         } catch (e) {
-            logger.error((e as Error).message)
+            logger.error('请求出错', (e as Error).message)
             return ''
         }
     }
@@ -122,6 +123,7 @@ export class Crawler {
     private async series() {
         const ts = Math.floor((new Date).getTime() / 1e3)
         const html = await this.getRoomPage()
+
         const signFunc = this.matchSignFunc(html)
         const params = this.createParams(signFunc, ts)
         const info = await this.getRoomInfo(params)

@@ -51,7 +51,11 @@ export class Logger {
     constructor(addDate = false, color = new Color(), level = LoggerLevel.WARN) {
         this.addDate = addDate
         this.color = color
-        this.level = level
+        if (process.env.DEBUG) {
+            this.level = LoggerLevel.DEBUG
+        } else {
+            this.level = level
+        }
     }
 
     private _time(): string {

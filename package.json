@@ -14,12 +14,11 @@
     "live": "./dist/main.js"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
-    "superagent": "^7.0.2"
+    "superagent": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "^17.0.9",
-    "@types/superagent": "^4.1.14",
+    "@types/node": "",
+    "@types/superagent": "",
     "@typescript-eslint/eslint-plugin": "",
     "@typescript-eslint/parser": "",
     "typescript": "",
