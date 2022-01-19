@@ -25,6 +25,16 @@
    ```bash
    yarn build
    ```
+   
+3. **windows 中需注意**
+   yarn 的命令目录可能不在 Path 中，也就是说编绎安装后无法调用`live`命令，需要将 yarn 的 Scripts 目录放在用户环境变量的 Path 中。
+   yarn 的 bin 目录路径请用下面的命令查看：
+
+   ```bash
+   yarn global bin
+   ```
+
+   将输出的目录添加到环境变量后重新打开`powershell`或`cmd`就可以执行`live`了。
 
 #### 使用说明
 
