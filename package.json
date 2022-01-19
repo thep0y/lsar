@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsc && node ./dist/main.js",
-    "build": "rm -rf ./dist && tsc && sed -i '1i\\#!/usr/bin/env node' ./dist/main.js && chmod +x ./dist/main.js && yarn link"
+    "build": "tsc && node ./dist/build.js && yarn link"
   },
   "bin": {
     "live": "./dist/main.js"

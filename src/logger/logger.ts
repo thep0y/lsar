@@ -134,3 +134,5 @@ export class Logger {
         process.exit(1)
     }
 }
+
+export const log = new Logger()
