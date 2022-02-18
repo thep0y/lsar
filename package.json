@@ -1,6 +1,6 @@
 {
   "name": "live-stream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "一个获取直播流地址的工具",
   "main": "./dist/main.js",
   "repository": "https://gitee.com:thepoy/live-stream",
@@ -14,7 +14,7 @@
     "live": "./dist/main.js"
   },
   "dependencies": {
-    "superagent": "^6.1.0"
+    "superagent": "^7.0.2"
   },
   "devDependencies": {
     "@types/node": "",

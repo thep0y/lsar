@@ -143,6 +143,9 @@ export class Crawler {
         const info = await this.series()
         let link_name = ''
         if (info) {
+            if (info.data.rtmp_live == undefined) {
+                logger.fatal(`${this.rid} 房间未开播`)
+            }
             link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
         } else {
             /*
@@ -154,6 +157,9 @@ export class Crawler {
             if (!info) {
                 logger.fatal('更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序')
             } else {
+                if (info.data.rtmp_live == undefined) {
+                    logger.fatal(`${this.rid} 房间未开播`)
+                }
                 link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
             }
         }
