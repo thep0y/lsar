@@ -1,6 +1,7 @@
 import { get, post } from 'superagent'
 import { createHash } from 'crypto'
 import { Color, Logger } from '../logger/logger'
+import { PREFIXS } from './consts'
 
 const did = '10000000000000000000000000001501'
 
@@ -8,6 +9,8 @@ const color = new Color()
 const logger = new Logger(false, color)
 
 interface Info {
+    error?: number
+    msg: string
     data: {
         rtmp_live: string
     }
@@ -126,6 +129,7 @@ export class Crawler {
 
         const signFunc = this.matchSignFunc(html)
         const params = this.createParams(signFunc, ts)
+
         const info = await this.getRoomInfo(params)
         return info
     }
@@ -173,14 +177,13 @@ export class Crawler {
 
     async printLiveLink(): Promise<void> {
         const name = await this.getLiveName()
-        const flv_link = `http://dyscdnali1.douyucdn.cn/live/${name}.flv`
-        const x_p2p_link = `http://tx2play1.douyucdn.cn/live/${name}.xs`
 
-        console.log('\n')
-        console.log(color.yellow('flv'), '链接：')
-        console.log(color.gray(flv_link), '\n')
-        console.log(color.yellow('x-p2p'), '链接：')
-        console.log(color.gray(x_p2p_link))
-        console.log('\n')
+        console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
+
+        PREFIXS.forEach(v => {
+            const flv_link = `http://${v}.douyucdn.cn/live/${name}.flv`
+            console.log(color.gray(flv_link), '\n')
+        })
+
     }
 }
