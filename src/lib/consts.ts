@@ -1,1 +1,1 @@
-export const PREFIXS = ['vplay3a', 'hlsa-akm']
+export const PREFIXS = ['akm-tct']
