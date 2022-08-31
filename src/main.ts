@@ -1,8 +1,6 @@
 import { Command, InvalidArgumentError } from 'commander'
 import { Douyu, Bilibili } from './apis'
 
-console.log(process.argv)
-
 const program = new Command()
 
 program
@@ -41,7 +39,7 @@ program
   .option('-r, --roomID <roomID>', '目标房间号', myParseInt, 0)
   .option('-u, --url <pageURL>', '房间页面链接')
   .action((arg: BiliArg) => {
-    const c = new Bilibili(arg.roomID, arg.url?.split('?')[0])
+    const c = new Bilibili(arg.roomID, arg.url)
     c.printLiveLink().catch((e) => {
       console.log(e)
     })
