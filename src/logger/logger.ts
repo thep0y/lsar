@@ -41,7 +41,11 @@ export enum LoggerLevel {
 type T = string | number | Error | object
 
 const isDebug = () => {
-  const debug = process.env.DEBUG!
+  const debug = process.env.DEBUG
+
+  if (!debug) {
+    return false
+  }
 
   if (debug === '1' || debug.toLowerCase() === 'true') {
     return true
