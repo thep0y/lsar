@@ -8,22 +8,23 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsc && node ./dist/main.js",
-    "build": "tsc && node ./dist/build.js && yarn link"
+    "build": "tsc && node ./dist/build.js && npm link"
   },
   "bin": {
     "live": "./dist/main.js"
   },
   "dependencies": {
-    "superagent": "^7.0.2"
+    "commander": "^9.4.0",
+    "superagent": "^8.0.0"
   },
   "devDependencies": {
     "@types/node": "",
     "@types/superagent": "",
     "@typescript-eslint/eslint-plugin": "",
     "@typescript-eslint/parser": "",
-    "typescript": "",
     "eslint": "",
     "eslint-plugin": "",
-    "eslint-plugin-eslint-plugin": ""
+    "eslint-plugin-eslint-plugin": "",
+    "typescript": ""
   }
 }

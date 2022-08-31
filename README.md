@@ -18,12 +18,16 @@
 
    ```bash
    yarn
+   # 或
+   pnpm install
    ```
 
 2. **编译安装**
 
    ```bash
    yarn build
+   # 或
+   pnpm build
    ```
    
 3. **windows 中需注意**
