@@ -6,7 +6,7 @@ const program = new Command()
 program
   .name('直播源解析')
   .description('能够获取斗鱼、B站直播源的命令行工具')
-  .version('1.0.4')
+  .version('<<<<>>>>')
 
 const myParseInt = (value: string) => {
   const parsedValue = Number(value)
