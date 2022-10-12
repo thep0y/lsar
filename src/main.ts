@@ -9,7 +9,6 @@ program
   .version('1.0.3')
 
 const myParseInt = (value: string) => {
-  console.log(value)
   const parsedValue = Number(value)
   if (isNaN(parsedValue)) {
     throw new InvalidArgumentError('不是一个整数')
@@ -29,8 +28,8 @@ program
   })
 
 interface BiliArg {
-    roomID: number;
-    url?: string;
+  roomID: number;
+  url?: string;
 }
 
 program
@@ -46,13 +45,3 @@ program
   })
 
 program.parse(process.argv)
-
-// if (process.argv.length < 3) {
-//     console.log('需要传入房间号')
-// } else {
-//     const roomID = process.argv.slice(2)[0]
-//     const c = new Douyu(parseInt(roomID))
-//     c.printLiveLink().then().catch((e) => {
-//         console.log(e)
-//     })
-// }
