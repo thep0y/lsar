@@ -31,11 +31,11 @@ export class Color {
 }
 
 export enum LoggerLevel {
-    DEBUG = 1,
-    INFO,
-    WARN,
-    ERROR,
-    FATAL,
+  DEBUG = 1,
+  INFO,
+  WARN,
+  ERROR,
+  FATAL,
 }
 
 type T = string | number | Error | object
@@ -146,7 +146,7 @@ export class Logger {
     }
   }
 
-  fatal(...msgs: T[]) {
+  fatal(...msgs: T[]): never {
     const msg = `${this._time()} [${this.color.red('FATAL')}]`
     console.log(this.mergeMsgs(msg, msgs))
     process.exit(1)

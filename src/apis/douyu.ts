@@ -5,11 +5,11 @@ import { Base, color, logger } from '.'
 const did = '10000000000000000000000000001501'
 
 interface Info {
-    error?: number;
-    msg: string;
-    data: {
-        rtmp_live: string;
-    };
+  error?: number;
+  msg: string;
+  data: {
+    rtmp_live: string;
+  };
 }
 
 export class Douyu extends Base {
@@ -137,6 +137,5 @@ export class Douyu extends Base {
       const flv_link = `http://${v}.douyucdn.cn/live/${name}.flv`
       console.log(color.gray(flv_link), '\n')
     })
-
   }
 }

@@ -57,17 +57,22 @@ export class Bilibili extends Base {
   }
 
   private async parseRoomID() {
-    const res = await this.get(this.pageURL!, { 
-      'Host': 'live.bilibili.com', 
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0', 
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8', 
-      'Accept-Language': 'zh-CN', 'Connection': 'keep-alive', 
-      'Upgrade-Insecure-Requests': '1', 
-      'Sec-Fetch-Dest': 'document', 
-      'Sec-Fetch-Mode': 'navigate', 
-      'Sec-Fetch-Site': 'none', 'Sec-Fetch-User': '?1', 'DNT': '1', 'Sec-GPC': '1' 
+    const res = await this.get(this.pageURL!, {
+      'Host': 'live.bilibili.com',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      'Accept-Language': 'zh-CN', 'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none', 'Sec-Fetch-User': '?1', 'DNT': '1', 'Sec-GPC': '1'
     })
-    const findResult = res.match(/"defaultRoomId":"(\d+)"/)!
+
+    let findResult = res.match(/"defaultRoomId":"(\d+)"/)!
+    if (!findResult) {
+      findResult = res.match(/"roomid":(\d+)/)!
+    }
+
     return Number(findResult[1])
   }
 
@@ -103,7 +108,6 @@ export class Bilibili extends Base {
               }
 
               const url = cdn.host + c.base_url
-              url.indexOf('?')
               console.log(color.gray(url.indexOf('?') ? url.split('?', 2)[0] : url), '\n')
             })
           })
