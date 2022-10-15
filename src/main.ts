@@ -18,8 +18,8 @@ const myParseInt = (value: string) => {
 
 program
   .command('douyu')
-  .argument('<roomID>', '目标房间号', myParseInt)
-  .description('解析斗鱼直播源')
+  .argument('<roomID>', '目标房间号（支持靓号）', myParseInt)
+  .description('解析斗鱼直播源（支持靓号）')
   .action((roomID: number) => {
     const c = new Douyu(roomID)
     c.printLiveLink().then().catch((e) => {

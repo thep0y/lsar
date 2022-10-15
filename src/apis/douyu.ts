@@ -14,7 +14,9 @@ interface Info {
 
 export class Douyu extends Base {
   private isPost = false
-  private ub98484234Reg = new RegExp(/var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/)
+  private ub98484234Reg = new RegExp(
+    /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/
+  )
   baseURL = 'https://www.douyu.com/'
 
   get roomURL(): string {
@@ -49,10 +51,11 @@ export class Douyu extends Base {
   }
 
   private matchSignFunc(html: string) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const matchResult = html.match(this.ub98484234Reg)!
     let ub98484234 = matchResult[0]
     ub98484234 = ub98484234.replace(/eval\(strc\)\(\w+,\w+,.\w+\);/, 'strc;')
-    const ts = Math.floor((new Date).getTime() / 1e3)
+    const ts = Math.floor(new Date().getTime() / 1e3)
     const ub98484234Call = `ub98484234(${this.roomID}, ${did}, ${ts})`
     let signFunc = ''
     try {
@@ -62,23 +65,33 @@ export class Douyu extends Base {
       if (slices[slices.length - 1] === 'defined') {
         const lossStr = `/var ${slices[0]}=.*?];/`
         const lossReg = new RegExp(eval(lossStr) as string)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const matchResult = html.match(lossReg)!
         signFunc = eval(ub98484234 + matchResult[0] + ub98484234Call) as string
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const v = signFunc.match(/\w{12}/)!
     const hash = createHash('md5')
     hash.update(`${this.roomID}${did}${ts}${v[0]}`)
     const md5 = hash.digest('hex')
-    signFunc = signFunc.replace(/CryptoJS\.MD5\(cb\)\.toString\(\)/, `"${md5}"`)
+    signFunc = signFunc.replace(
+      /CryptoJS\.MD5\(cb\)\.toString\(\)/,
+      `"${md5}"`
+    )
     signFunc = signFunc.split('return rt;})')[0] + 'return rt;})'
     logger.debug(signFunc)
     return signFunc
   }
 
   private async series() {
-    const ts = Math.floor((new Date).getTime() / 1e3)
+    const ts = Math.floor(new Date().getTime() / 1e3)
     const html = await this.getRoomPage()
+
+    const r = html.match(/\?room_id=(\d+)/)
+    if (r) {
+      this.roomID = Number(r[1])
+    }
 
     const signFunc = this.matchSignFunc(html)
     const params = this.createParams(signFunc, ts)
@@ -112,12 +125,17 @@ export class Douyu extends Base {
       this.isPost = !this.isPost
       const info = await this.series()
       if (!info) {
-        logger.fatal('更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序')
+        logger.fatal(
+          '更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序'
+        )
       } else {
         if (info.data.rtmp_live == undefined) {
           logger.fatal(`${this.roomID} 房间未开播`)
         }
-        link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
+        link_name = info.data.rtmp_live
+          .split('?')[0]
+          .split('.')[0]
+          .split('_')[0]
       }
     }
     return link_name
@@ -133,7 +151,7 @@ export class Douyu extends Base {
 
     console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
 
-    DOUYU_PREFIXS.forEach(v => {
+    DOUYU_PREFIXS.forEach((v) => {
       const flv_link = `http://${v}.douyucdn.cn/live/${name}.flv`
       console.log(color.gray(flv_link), '\n')
     })
