@@ -88,9 +88,12 @@ export class Douyu extends Base {
     const ts = Math.floor(new Date().getTime() / 1e3)
     const html = await this.getRoomPage()
 
-    const r = html.match(/\?room_id=(\d+)/)
+    const r = html.match(/\?room_id=(.+?)"/)
     if (r) {
-      this.roomID = Number(r[1])
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      this.roomID = Number(r[1].replaceAll(',', ''))
+
+      logger.info('在网页中解析到最终房间 id：', this.roomID)
     }
 
     const signFunc = this.matchSignFunc(html)

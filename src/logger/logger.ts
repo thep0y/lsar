@@ -31,11 +31,11 @@ export class Color {
 }
 
 export enum LoggerLevel {
-  DEBUG = 1,
-  INFO,
-  WARN,
-  ERROR,
-  FATAL,
+	DEBUG = 1,
+	INFO,
+	WARN,
+	ERROR,
+	FATAL,
 }
 
 type T = string | number | Error | object

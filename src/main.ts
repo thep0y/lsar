@@ -22,9 +22,11 @@ program
   .description('解析斗鱼直播源（支持靓号）')
   .action((roomID: number) => {
     const c = new Douyu(roomID)
-    c.printLiveLink().then().catch((e) => {
-      console.log(e)
-    })
+    c.printLiveLink()
+      .then()
+      .catch((e) => {
+        console.log(e)
+      })
   })
 
 interface BiliArg {

@@ -2,7 +2,11 @@ import { get, post } from 'superagent'
 import { Color, Logger, LoggerLevel } from '../logger/logger'
 
 export const color = new Color()
-export const logger = new Logger(false, color, process.env.DEBUG === '1' ? LoggerLevel.DEBUG : LoggerLevel.WARN)
+export const logger = new Logger(
+  false,
+  color,
+  process.env.DEBUG === '1' ? LoggerLevel.DEBUG : LoggerLevel.WARN
+)
 
 export abstract class Base {
   roomID: number
@@ -12,9 +16,9 @@ export abstract class Base {
     this.roomID = roomID
   }
 
-  abstract get roomURL(): string
+  abstract get roomURL(): string;
 
-  abstract printLiveLink(): Promise<void>
+  abstract printLiveLink(): Promise<void>;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -53,10 +57,13 @@ export abstract class Base {
   async post(url: string, params: string): Promise<string> {
     logger.debug('POST 正在访问的链接：', url, '使用的参数', params)
     try {
-      const resp = await post(url).timeout({
-        response: 5000,
-        deadline: 60000
-      }).type('form').send(params)
+      const resp = await post(url)
+        .timeout({
+          response: 5000,
+          deadline: 60000
+        })
+        .type('form')
+        .send(params)
       if (resp.statusCode === 200) {
         return resp.text
       } else {

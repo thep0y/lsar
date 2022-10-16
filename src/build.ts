@@ -6,10 +6,12 @@ const mainPath = './dist/main.js'
 
 const isWindows = os.platform() == 'win32'
 
-const getVersion = () => {
-  const content = fs.readFileSync("./package.json")
-  const json = JSON.parse(content.toString('utf-8'))
-  return json.version
+const getVersion = (): string => {
+  const content = fs.readFileSync('./package.json')
+  const { version } = JSON.parse(content.toString('utf-8')) as {
+    version: string;
+  }
+  return version
 }
 
 fs.readFile(mainPath, (err, data) => {
@@ -17,7 +19,8 @@ fs.readFile(mainPath, (err, data) => {
 
   const verion = getVersion()
 
-  const content = '#!/usr/bin/env node\n' + data.toString().replace('<<<<>>>>', verion)
+  const content =
+    '#!/usr/bin/env node\n' + data.toString().replace('<<<<>>>>', verion)
   fs.writeFile(mainPath, content, (err) => {
     if (err) log.fatal(err)
   })
@@ -34,6 +37,5 @@ if (!isWindows) {
         if (err) log.fatal(err)
       })
     })
-
   })
 }
