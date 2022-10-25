@@ -38,16 +38,19 @@ export abstract class Base {
         deadline: 60000
       })
 
-      logger.debug('响应头', JSON.stringify(resp.headers))
+      const respHeader = JSON.stringify(resp.headers)
+      logger.debug('响应头', respHeader)
 
       if (resp.statusCode === 200) {
-        logger.debug('响应成功')
+        logger.debug('获得响应：', resp.text)
+
         return resp.text
       } else {
         logger.fatal('状态码不对', resp.statusCode)
       }
     } catch (e) {
       logger.error('请求出错', (e as Error).message)
+
       return ''
     }
   }
@@ -65,6 +68,7 @@ export abstract class Base {
         .type('form')
         .send(params)
       if (resp.statusCode === 200) {
+        logger.debug('获得响应：', resp.text)
         return resp.text
       } else {
         logger.fatal('状态码不对', resp.statusCode)

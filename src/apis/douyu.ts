@@ -36,7 +36,7 @@ export class Douyu extends Base {
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.roomID}?${params}`
       resp = await this.get(url)
-      if (!resp) {
+      if (!resp || Object.hasOwn(JSON.parse(resp) as object, 'error')) {
         logger.warn('响应异常，更换 POST 请求重试')
         return null
       }
@@ -98,6 +98,8 @@ export class Douyu extends Base {
 
     const signFunc = this.matchSignFunc(html)
     const params = this.createParams(signFunc, ts)
+
+    logger.debug('请求参数：', params)
 
     const info = await this.getRoomInfo(params)
     return info
