@@ -1,1 +1,1 @@
-export const DOUYU_PREFIXS = ['akm-tct']
+export const DOUYU_PREFIXS = ['akm-tct', 'ws-tct']
