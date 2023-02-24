@@ -1,9 +1,9 @@
 {
-  "name": "live-stream",
-  "version": "1.0.6",
-  "description": "一个获取直播流地址的工具",
+  "name": "lsar",
+  "version": "1.0.7",
+  "description": "Live Source Address Resolution",
   "main": "./dist/main.js",
-  "repository": "https://gitee.com:thepoy/live-stream",
+  "repository": "https://github.com/thep0y/lasr",
   "author": "thepoy <thepoy@163.com>",
   "license": "MIT",
   "scripts": {
@@ -11,7 +11,7 @@
     "build": "tsc && node ./dist/build.js && npm link"
   },
   "bin": {
-    "live": "./dist/main.js"
+    "lsar": "./dist/main.js"
   },
   "dependencies": {
     "commander": "^10.0.0",

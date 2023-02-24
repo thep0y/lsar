@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { DOUYU_PREFIXS } from '../lib/consts'
+import { DOUYU_PREFIXS, DOUYU_PROXY } from '../lib/consts'
 import { Base, color, logger } from '.'
 
 const did = '10000000000000000000000000001501'
@@ -162,6 +162,11 @@ export class Douyu extends Base {
       console.log(color.gray(flv_link), '\n')
       const m3u8_link = `${link}m3u8`
       console.log(color.gray(m3u8_link), '\n')
+
     })
+
+    console.log('\n上面 cdn 均不可用时，用下面的代理试试：\n')
+    const proxy = DOUYU_PROXY + this.roomID
+    console.log(color.gray(proxy), '\n')
   }
 }
