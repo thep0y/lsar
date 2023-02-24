@@ -14,7 +14,7 @@ Live Source Address Resolution.
 ```bash
 npm i -g lsar
 yarn add global lsar
-pnpm i -d lsar
+pnpm i -g lsar
 ```
 
 ### 2 源码
