@@ -14,18 +14,18 @@
     "live": "./dist/main.js"
   },
   "dependencies": {
-    "commander": "latest",
-    "superagent": "latest"
+    "commander": "^10.0.0",
+    "superagent": "^8.0.9"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/superagent": "4.1.14",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
-    "cross-env": "latest",
-    "eslint": "latest",
-    "eslint-plugin": "latest",
-    "eslint-plugin-eslint-plugin": "latest",
-    "typescript": "latest"
+    "@types/node": "^18.14.1",
+    "@types/superagent": "4.1.16",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.34.0",
+    "eslint-plugin": "^1.0.1",
+    "eslint-plugin-eslint-plugin": "^5.0.8",
+    "typescript": "^4.9.5"
   }
 }

@@ -157,8 +157,11 @@ export class Douyu extends Base {
     console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
 
     DOUYU_PREFIXS.forEach((v) => {
-      const flv_link = `http://${v}.douyucdn.cn/live/${name}.flv`
+      const link = `http://${v}.douyucdn.cn/live/${name}.`
+      const flv_link = `${link}flv`
       console.log(color.gray(flv_link), '\n')
+      const m3u8_link = `${link}m3u8`
+      console.log(color.gray(m3u8_link), '\n')
     })
   }
 }
