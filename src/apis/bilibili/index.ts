@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Base, color, logger } from '.'
+import { Base, color, logger } from '..'
 
 interface CDNItem {
   host: string;

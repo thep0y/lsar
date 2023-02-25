@@ -24,7 +24,9 @@ pnpm i -g lsar
 克隆
 
 ```bash
-git clone https://gitee.com/thepoy/live-stream
+git clone https://gitee.com/thepoy/lsar
+# 或者
+git clone https://github.com/thep0y/lsar
 ```
 
 并进入项目目录后
