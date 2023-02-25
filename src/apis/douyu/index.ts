@@ -30,14 +30,14 @@ export class Douyu extends Base {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.roomID}`
       resp = await this.post(url, params)
       if (!resp) {
-        logger.warn('响应异常，更换 GET 请求重试')
+        logger.warn('POST 请求响应异常，更换 GET 请求重试')
         return null
       }
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.roomID}?${params}`
       resp = await this.get(url)
       if (!resp || Object.hasOwn(JSON.parse(resp) as object, 'error')) {
-        logger.warn('响应异常，更换 POST 请求重试')
+        logger.warn('GET 请求响应异常，更换 POST 请求重试')
         return null
       }
     }
