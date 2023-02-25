@@ -4,7 +4,7 @@ import { Douyu, Bilibili } from './apis'
 const program = new Command()
 
 program
-  .name('直播源解析')
+  .name('lsar')
   .description('能够获取斗鱼、B站直播源的命令行工具')
   .version('<<<<>>>>')
 
