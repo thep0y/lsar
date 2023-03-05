@@ -19,7 +19,7 @@ const infoString = (info: Info): string => {
   })
 }
 
-const not_living = '房间未开播'
+const NOT_LIVING_STATE = '房间未开播'
 
 export class Douyu extends Base {
   private isPost = false
@@ -58,8 +58,8 @@ export class Douyu extends Base {
 
     logger.debug('有效响应体：', infoString(info))
 
-    if (Object.hasOwn(info, 'error') && info.msg === not_living) {
-      return logger.fatal(`${this.roomID} ${not_living}`)
+    if (Object.hasOwn(info, 'error') && info.msg === NOT_LIVING_STATE) {
+      return logger.fatal(`${this.roomID} ${NOT_LIVING_STATE}`)
     }
 
     return info
