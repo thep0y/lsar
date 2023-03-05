@@ -12,6 +12,13 @@ interface Info {
   };
 }
 
+const infoString = (info: Info): string => {
+  const { error, msg, data: { rtmp_live } } = info
+  return JSON.stringify({
+    error, msg, rtmp_live
+  })
+}
+
 const not_living = '房间未开播'
 
 export class Douyu extends Base {
@@ -19,6 +26,9 @@ export class Douyu extends Base {
   private ub98484234Reg = new RegExp(
     /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/
   )
+  private finalRoomID = 0
+  private signFunc = ''
+
   baseURL = 'https://www.douyu.com/'
 
   get roomURL(): string {
@@ -29,14 +39,14 @@ export class Douyu extends Base {
     let url = ''
     let resp = ''
     if (this.isPost) {
-      url = `https://www.douyu.com/lapi/live/getH5Play/${this.roomID}`
+      url = `https://www.douyu.com/lapi/live/getH5Play/${this.finalRoomID}`
       resp = await this.post(url, params)
       if (!resp) {
         logger.warn('POST 请求未功能获得响应，更换 GET 请求重试')
         return null
       }
     } else {
-      url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.roomID}?${params}`
+      url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.finalRoomID}?${params}`
       resp = await this.get(url)
       if (!resp) {
         logger.warn('GET 请求未功能获得响应，更换 POST 请求重试')
@@ -45,6 +55,9 @@ export class Douyu extends Base {
     }
 
     const info = JSON.parse(resp) as Info
+
+    logger.debug('有效响应体：', infoString(info))
+
     if (Object.hasOwn(info, 'error') && info.msg === not_living) {
       return logger.fatal(`${this.roomID} ${not_living}`)
     }
@@ -52,8 +65,8 @@ export class Douyu extends Base {
     return info
   }
 
-  private createParams(signFunc: string, ts: number): string {
-    signFunc = signFunc + `(${this.roomID},"${did}",${ts})`
+  private createParams(ts: number): string {
+    const signFunc = this.signFunc + `(${this.finalRoomID},"${did}",${ts})`
     return eval(signFunc) as string
   }
 
@@ -63,7 +76,7 @@ export class Douyu extends Base {
     let ub98484234 = matchResult[0]
     ub98484234 = ub98484234.replace(/eval\(strc\)\(\w+,\w+,.\w+\);/, 'strc;')
     const ts = Math.floor(new Date().getTime() / 1e3)
-    const ub98484234Call = `ub98484234(${this.roomID}, ${did}, ${ts})`
+    const ub98484234Call = `ub98484234(${this.finalRoomID}, ${did}, ${ts})`
     let signFunc = ''
     try {
       signFunc = eval(ub98484234 + ub98484234Call) as string
@@ -80,7 +93,7 @@ export class Douyu extends Base {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const v = signFunc.match(/\w{12}/)!
     const hash = createHash('md5')
-    hash.update(`${this.roomID}${did}${ts}${v[0]}`)
+    hash.update(`${this.finalRoomID}${did}${ts}${v[0]}`)
     const md5 = hash.digest('hex')
     signFunc = signFunc.replace(
       /CryptoJS\.MD5\(cb\)\.toString\(\)/,
@@ -92,19 +105,22 @@ export class Douyu extends Base {
   }
 
   private async series() {
-    const ts = Math.floor(new Date().getTime() / 1e3)
-    const html = await this.getRoomPage()
+    if (!this.signFunc) {
+      const html = await this.getRoomPage()
 
-    const r = html.match(/\?room_id=(.+?)"/)
-    if (r) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      this.roomID = Number(r[1].replaceAll(',', ''))
+      const r = html.match(/\?room_id=(.+?)"/)
+      if (r) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        this.finalRoomID = Number(r[1].replaceAll(',', ''))
 
-      logger.info('在网页中解析到最终房间 id：', this.roomID)
+        logger.info('在网页中解析到最终房间 id：', this.finalRoomID)
+      }
+
+      this.signFunc = this.matchSignFunc(html)
     }
 
-    const signFunc = this.matchSignFunc(html)
-    const params = this.createParams(signFunc, ts)
+    const ts = Math.floor(new Date().getTime() / 1e3)
+    const params = this.createParams(ts)
 
     logger.debug('请求参数：', params)
 
@@ -126,7 +142,7 @@ export class Douyu extends Base {
     let link_name = ''
     if (info) {
       if (info.data.rtmp_live == undefined) {
-        logger.fatal(`${this.roomID} 房间未开播`)
+        logger.fatal(`${this.finalRoomID} 房间未开播`)
       }
       link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
     } else {
@@ -142,7 +158,7 @@ export class Douyu extends Base {
         )
       } else {
         if (info.data.rtmp_live == undefined) {
-          logger.fatal(`${this.roomID} 房间未开播`)
+          logger.fatal(`${this.finalRoomID} 房间未开播`)
         }
         link_name = info.data.rtmp_live
           .split('?')[0]
