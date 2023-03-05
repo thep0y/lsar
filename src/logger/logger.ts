@@ -41,18 +41,27 @@ export enum LoggerLevel {
 
 type T = string | number | Error | object
 
-const isDebug = () => {
-  const debug = process.env.DEBUG
+const getLevelFromEnv = (): LoggerLevel => {
+  const level = process.env.LOG_LEVEL
 
-  if (!debug) {
-    return false
+  if (!level) {
+    return LoggerLevel.WARNING
   }
 
-  if (debug === '1' || debug.toLowerCase() === 'true') {
-    return true
+  switch (level) {
+  case '1':
+    return LoggerLevel.TRACE
+  case '2':
+    return LoggerLevel.DEBUG
+  case '3':
+    return LoggerLevel.INFO
+  case '5':
+    return LoggerLevel.ERROR
+  case '6':
+    return LoggerLevel.TRACE
+  default:
+    return LoggerLevel.WARNING
   }
-
-  return false
 }
 
 /**
@@ -64,14 +73,10 @@ export class Logger {
   private level: LoggerLevel
   private prefixes: Record<LoggerLevel, string>
 
-  constructor(addDate = false, color = new Color(), level = LoggerLevel.WARNING) {
+  constructor(addDate = false, color = new Color()) {
     this.addDate = addDate
     this.color = color
-    if (isDebug()) {
-      this.level = LoggerLevel.DEBUG
-    } else {
-      this.level = level
-    }
+    this.level = getLevelFromEnv()
 
     this.prefixes = {
       1: this.color.gray('TRC'),

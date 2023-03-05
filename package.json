@@ -7,7 +7,7 @@
   "author": "thepoy <thepoy@163.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && cross-env DEBUG=1 node ./dist/main.js",
+    "dev": "tsc && cross-env LOG_LEVEL=2 node ./dist/main.js",
     "build": "tsc && node ./dist/build.js"
   },
   "bin": {

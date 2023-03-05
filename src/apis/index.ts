@@ -1,12 +1,8 @@
 import { get, post, SuperAgentRequest } from 'superagent'
-import { Color, Logger, LoggerLevel } from '../logger/logger'
+import { Color, Logger } from '../logger/logger'
 
 export const color = new Color()
-export const logger = new Logger(
-  false,
-  color,
-  process.env.DEBUG === '1' ? LoggerLevel.DEBUG : LoggerLevel.WARNING
-)
+export const logger = new Logger(false, color)
 
 export abstract class Base {
   roomID: number
