@@ -9,6 +9,10 @@ Live Source Address Resolution.
 
 ## 安装
 
+### 0 新手
+
+新手小白点击[新手教程](https://github.com/thep0y/lsar/blob/master/doc/beginner-tutorial.md)。
+
 ### 1 包管理器
 
 ```bash
