@@ -30,14 +30,14 @@ export class Douyu extends Base {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.roomID}`
       resp = await this.post(url, params)
       if (!resp) {
-        logger.warn('POST 请求响应异常，更换 GET 请求重试')
+        logger.warn('POST 请求响应异常，更换 GET 请求重试', resp)
         return null
       }
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.roomID}?${params}`
       resp = await this.get(url)
       if (!resp || Object.hasOwn(JSON.parse(resp) as object, 'error')) {
-        logger.warn('GET 请求响应异常，更换 POST 请求重试')
+        logger.warn('GET 请求响应异常，更换 POST 请求重试', resp)
         return null
       }
     }
@@ -80,7 +80,7 @@ export class Douyu extends Base {
       `"${md5}"`
     )
     signFunc = signFunc.split('return rt;})')[0] + 'return rt;})'
-    logger.debug(signFunc)
+    logger.trace(signFunc)
     return signFunc
   }
 
@@ -156,7 +156,7 @@ export class Douyu extends Base {
 
     console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
 
-    for (const [prefix, format] of Object.entries(DOUYU_PREFIXS) ) {
+    for (const [prefix, format] of Object.entries(DOUYU_PREFIXS)) {
       const link = `http://${prefix}.douyucdn.cn/live/${name}.`
 
       if (format.flv) {

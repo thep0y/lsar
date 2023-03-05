@@ -31,9 +31,10 @@ export class Color {
 }
 
 export enum LoggerLevel {
-  DEBUG = 1,
+  TRACE = 1,
+  DEBUG,
   INFO,
-  WARN,
+  WARNING,
   ERROR,
   FATAL,
 }
@@ -61,14 +62,24 @@ export class Logger {
   private color: Color
   private addDate = false
   private level: LoggerLevel
+  private prefixes: Record<LoggerLevel, string>
 
-  constructor(addDate = false, color = new Color(), level = LoggerLevel.WARN) {
+  constructor(addDate = false, color = new Color(), level = LoggerLevel.WARNING) {
     this.addDate = addDate
     this.color = color
     if (isDebug()) {
       this.level = LoggerLevel.DEBUG
     } else {
       this.level = level
+    }
+
+    this.prefixes = {
+      1: this.color.gray('TRC'),
+      2: this.color.purple('DEB'),
+      3: this.color.green('INF'),
+      4: this.color.yellow('WAR'),
+      5: this.color.red('ERR'),
+      6: this.color.red('FAT')
     }
   }
 
@@ -118,38 +129,43 @@ export class Logger {
     return msg
   }
 
+  private baseMsg(level: LoggerLevel): string {
+    return `${this._time()} ${this.prefixes[level]} ${this.color.cyan('>')}`
+  }
+
+  trace(...msgs: T[]) {
+    if (LoggerLevel.TRACE >= this.level) {
+      console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.TRACE), msgs))
+    }
+  }
+
   debug(...msgs: T[]) {
     if (LoggerLevel.DEBUG >= this.level) {
-      const msg = `${this._time()} ${this.color.purple('DEB')} ${this.color.cyan('>')}`
-      console.log(this.mergeMsgs(msg, msgs))
+      console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.DEBUG), msgs))
     }
   }
 
   info(...msgs: T[]) {
     if (LoggerLevel.INFO >= this.level) {
-      const msg = `${this._time()} ${this.color.green('INF')} ${this.color.cyan('>')}`
-      console.log(this.mergeMsgs(msg, msgs))
+      console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.INFO), msgs))
     }
   }
 
   error(...msgs: T[]) {
     if (LoggerLevel.ERROR >= this.level) {
-      const msg = `${this._time()} ${this.color.red('ERR')} ${this.color.cyan('>')}`
-      console.log(this.mergeMsgs(msg, msgs))
+      console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.ERROR), msgs))
     }
   }
 
   warn(...msgs: T[]) {
-    if (LoggerLevel.WARN >= this.level) {
-      const msg = `${this._time()} ${this.color.yellow('WAR')} ${this.color.cyan('>')}`
-      console.log(this.mergeMsgs(msg, msgs))
+    if (LoggerLevel.WARNING >= this.level) {
+      console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.WARNING), msgs))
     }
   }
 
   fatal(...msgs: T[]): never {
-    const msg = `${this._time()} ${this.color.red('FAT')} ${this.color.cyan('>')}`
-    console.log(this.mergeMsgs(msg, msgs))
-    process.exit(1)
+    console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.FATAL), msgs))
+    return process.exit(1)
   }
 }
 

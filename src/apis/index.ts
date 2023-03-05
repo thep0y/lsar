@@ -1,11 +1,11 @@
-import { get, post } from 'superagent'
+import { get, post, SuperAgentRequest } from 'superagent'
 import { Color, Logger, LoggerLevel } from '../logger/logger'
 
 export const color = new Color()
 export const logger = new Logger(
   false,
   color,
-  process.env.DEBUG === '1' ? LoggerLevel.DEBUG : LoggerLevel.WARN
+  process.env.DEBUG === '1' ? LoggerLevel.DEBUG : LoggerLevel.WARNING
 )
 
 export abstract class Base {
@@ -20,6 +20,26 @@ export abstract class Base {
 
   abstract printLiveLink(): Promise<void>;
 
+  async request(req: SuperAgentRequest): Promise<string> {
+    try {
+      const resp = await req
+
+      const respHeader = JSON.stringify(resp.headers)
+      logger.trace('响应头', respHeader)
+
+      if (resp.statusCode === 200) {
+        logger.debug('响应成功，状态码 200')
+        logger.trace('响应体：', resp.text)
+        return resp.text
+      } else {
+        return logger.fatal('状态码不对', resp.statusCode)
+      }
+    } catch (e) {
+      logger.error('请求出错', (e as Error).message)
+      return ''
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   async get(url: string, headers?: { [key: string]: string }): Promise<string> {
@@ -32,51 +52,23 @@ export abstract class Base {
       }
     }
 
-    try {
-      const resp = await req.timeout({
-        response: 5000,
-        deadline: 60000
-      })
-
-      const respHeader = JSON.stringify(resp.headers)
-      logger.debug('响应头', respHeader)
-
-      if (resp.statusCode === 200) {
-        logger.debug('获得响应：', resp.text)
-
-        return resp.text
-      } else {
-        logger.fatal('状态码不对', resp.statusCode)
-      }
-    } catch (e) {
-      logger.error('请求出错', (e as Error).message)
-
-      return ''
-    }
+    return await this.request(req.timeout({
+      response: 5000,
+      deadline: 60000
+    }))
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   async post(url: string, params: string): Promise<string> {
     logger.debug('POST 正在访问的链接：', url, '使用的参数', params)
-    try {
-      const resp = await post(url)
-        .timeout({
-          response: 5000,
-          deadline: 60000
-        })
-        .type('form')
-        .send(params)
-      if (resp.statusCode === 200) {
-        logger.debug('获得响应：', resp.text)
-        return resp.text
-      } else {
-        logger.fatal('状态码不对', resp.statusCode)
-      }
-    } catch (e) {
-      logger.error('请求出错', (e as Error).message)
-      return ''
-    }
+    return await this.request(post(url)
+      .timeout({
+        response: 5000,
+        deadline: 60000
+      })
+      .type('form')
+      .send(params))
   }
 }
 
