@@ -1,21 +1,27 @@
 import { createHash } from 'crypto'
-import { DOUYU_PREFIXS, DOUYU_PROXY } from './consts'
+import { CDNS, DOUYU_PROXY } from './consts'
 import { Base, color, logger } from '..'
 
 const did = '10000000000000000000000000001501'
 
 interface Info {
-  error?: number;
-  msg: string;
+  error?: number
+  msg: string
   data: {
-    rtmp_live: string;
-  };
+    rtmp_live: string
+  }
 }
 
 const infoString = (info: Info): string => {
-  const { error, msg, data: { rtmp_live } } = info
+  const {
+    error,
+    msg,
+    data: { rtmp_live },
+  } = info
   return JSON.stringify({
-    error, msg, rtmp_live
+    error,
+    msg,
+    rtmp_live,
   })
 }
 
@@ -95,10 +101,7 @@ export class Douyu extends Base {
     const hash = createHash('md5')
     hash.update(`${this.finalRoomID}${did}${ts}${v[0]}`)
     const md5 = hash.digest('hex')
-    signFunc = signFunc.replace(
-      /CryptoJS\.MD5\(cb\)\.toString\(\)/,
-      `"${md5}"`
-    )
+    signFunc = signFunc.replace(/CryptoJS\.MD5\(cb\)\.toString\(\)/, `"${md5}"`)
     signFunc = signFunc.split('return rt;})')[0] + 'return rt;})'
     logger.trace(signFunc)
     return signFunc
@@ -179,20 +182,22 @@ export class Douyu extends Base {
 
     console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
 
-    for (const [prefix, format] of Object.entries(DOUYU_PREFIXS)) {
-      const link = `http://${prefix}.douyucdn.cn/live/${name}.`
+    for (const [cdn, config] of Object.entries(CDNS)) {
+      for (const [prefix, format] of Object.entries(config)) {
+        const link = `http://${prefix}.${cdn}${name}.`
 
-      if (format.flv) {
-        const flv_link = `${link}flv`
-        console.log(color.gray(flv_link))
+        if (format.flv) {
+          const flv_link = `${link}flv`
+          console.log(color.gray(flv_link))
+        }
+
+        if (format.m3u8) {
+          const m3u8_link = `${link}m3u8`
+          console.log(color.gray(m3u8_link))
+        }
+
+        console.log('\n')
       }
-
-      if (format.m3u8) {
-        const m3u8_link = `${link}m3u8`
-        console.log(color.gray(m3u8_link))
-      }
-
-      console.log('\n')
     }
 
     console.log('\n上面 cdn 均不可用时，用下面的代理试试：\n')
