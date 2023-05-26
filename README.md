@@ -11,7 +11,7 @@ Live Source Address Resolution.
 
 ### 0 新手
 
-新手小白点击[新手教程](https://github.com/thep0y/lsar/blob/master/doc/beginner-tutorial.md)。
+新手小白点击[新手教程](doc/beginner-tutorial.md)。
 
 ### 1 包管理器
 
