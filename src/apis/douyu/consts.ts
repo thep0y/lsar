@@ -9,9 +9,7 @@ type Prefix = string
 type Config = Record<Prefix, Format>
 
 export const CDNS: Record<CDN, Config> = {
-  'douyucdn2.cn/dyliveflv1a/': {
-    'openhls-tct': { flv: true, m3u8: true }
-  },
+  'douyucdn2.cn/dyliveflv1a/': {},
   'douyucdn.cn/live/': {
     'hls3a-akm': { flv: false, m3u8: true },
     'hls3-akm': { flv: false, m3u8: true },
