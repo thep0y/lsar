@@ -6,7 +6,7 @@
 
 运行本软件需要 node 运行环境，可通下以下链接下载：
 
-- [Windown x64](https://nodejs.org/dist/v18.14.2/node-v18.14.2-x64.msi)
+- [Windows x64](https://nodejs.org/dist/v18.14.2/node-v18.14.2-x64.msi)
 - [macOS](https://nodejs.org/dist/v18.14.2/node-v18.14.2.pkg)
 - Linux x64 就不放了，用的 Linux 的人，怎么会是小白？
 
@@ -71,8 +71,7 @@ yarn add global lsar
 需要注意的是，第一次使用 pnpm 安装时需要在安装后再执行一句：
 
 ```bash
-pnpm setup                                                                                                             
+pnpm setup
 ```
 
 然后关闭终端，再打开新的终端才能调用`lsar`命令。
-
