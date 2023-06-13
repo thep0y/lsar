@@ -5,23 +5,23 @@ import { Base, color, logger } from '..'
 const did = '10000000000000000000000000001501'
 
 interface Info {
-  error?: number
-  msg: string
+  error?: number;
+  msg: string;
   data: {
-    rtmp_live: string
-  }
+    rtmp_live: string;
+  };
 }
 
 const infoString = (info: Info): string => {
   const {
     error,
     msg,
-    data: { rtmp_live },
+    data: { rtmp_live }
   } = info
   return JSON.stringify({
     error,
     msg,
-    rtmp_live,
+    rtmp_live
   })
 }
 
@@ -143,7 +143,7 @@ export class Douyu extends Base {
         */
     const info = await this.series()
     let link_name = ''
-    if (info) {
+    if (info && info.error !== -15) {
       if (info.data.rtmp_live == undefined) {
         logger.fatal(`${this.finalRoomID} 房间未开播`)
       }
