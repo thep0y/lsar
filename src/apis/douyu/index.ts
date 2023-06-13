@@ -12,6 +12,14 @@ interface Info {
   };
 }
 
+interface MobileResponse {
+  error: number;
+  msg: string;
+  data: {
+    url: string;
+  };
+}
+
 const infoString = (info: Info): string => {
   const {
     error,
@@ -107,7 +115,12 @@ export class Douyu extends Base {
     return signFunc
   }
 
-  private async series() {
+  private async series(params: string) {
+    const info = await this.getRoomInfo(params)
+    return info
+  }
+
+  private async params(): Promise<string> {
     if (!this.signFunc) {
       const html = await this.getRoomPage()
 
@@ -121,14 +134,11 @@ export class Douyu extends Base {
 
       this.signFunc = this.matchSignFunc(html)
     }
-
     const ts = Math.floor(new Date().getTime() / 1e3)
     const params = this.createParams(ts)
-
     logger.debug('请求参数：', params)
 
-    const info = await this.getRoomInfo(params)
-    return info
+    return params
   }
 
   private async getLiveName() {
@@ -141,7 +151,17 @@ export class Douyu extends Base {
             添加码率后的文件名为 {name}_{bit}.flv 或 {name}_{bit}.xs，
             不添加码率就会播放最高码率
         */
-    const info = await this.series()
+
+    const params = await this.params()
+
+    const mobileStream = await this.getMobileStream(params)
+    if (mobileStream) {
+      console.log('优选：手机播放流\n')
+      console.log(color.gray(mobileStream))
+      console.log('\n')
+    }
+
+    const info = await this.series(params)
     let link_name = ''
     if (info && info.error !== -15) {
       if (info.data.rtmp_live == undefined) {
@@ -154,7 +174,7 @@ export class Douyu extends Base {
                所以这里请求失败时修改，但也只修改一次请求方式，如果仍失败就需要重新执行
             */
       this.isPost = !this.isPost
-      const info = await this.series()
+      const info = await this.series(params)
       if (!info) {
         logger.fatal(
           '更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序'
@@ -177,10 +197,27 @@ export class Douyu extends Base {
     return await this.get(this.roomURL)
   }
 
+  private async getMobileStream(params: string): Promise<string | undefined> {
+    const url = 'https://m.douyu.com/hgapi/livenc/room/getStreamUrl'
+    const resp = await this.post(
+      url,
+      params + `&rid=${String(this.finalRoomID)}&rate=-1`
+    )
+
+    const mr = JSON.parse(resp) as MobileResponse
+
+    if (mr.error !== 0) {
+      logger.error('获取手机播放流出错：', mr.msg)
+      return
+    }
+
+    return mr.data.url
+  }
+
   async printLiveLink(): Promise<void> {
     const name = await this.getLiveName()
 
-    console.log('\n选择下面的任意一条链接，播放失败换其他链接试试：\n')
+    console.log('\n次选：选择下面的任意一条链接，播放失败换其他链接试试\n')
 
     for (const [cdn, config] of Object.entries(CDNS)) {
       for (const [prefix, format] of Object.entries(config)) {
@@ -200,7 +237,7 @@ export class Douyu extends Base {
       }
     }
 
-    console.log('\n上面 cdn 均不可用时，用下面的代理试试：\n')
+    console.log('\n末选：上面 cdn 均不可用时，用下面的代理试试：\n')
     const proxy = DOUYU_PROXY + this.roomID.toString()
     console.log(color.gray(proxy), '\n')
   }
