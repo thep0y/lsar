@@ -39,7 +39,7 @@ export enum LoggerLevel {
   FATAL,
 }
 
-type T = string | number | Error | object
+export type MsgArg = string | number | Error | object
 
 const getLevelFromEnv = (): LoggerLevel => {
   const level = process.env.LOG_LEVEL
@@ -64,6 +64,8 @@ const getLevelFromEnv = (): LoggerLevel => {
   }
 }
 
+export const defaultColor = new Color()
+
 /**
  * 彩色日志
  */
@@ -73,7 +75,7 @@ export class Logger {
   private level: LoggerLevel
   private prefixes: Record<LoggerLevel, string>
 
-  constructor(addDate = false, color = new Color()) {
+  constructor(addDate = false, color: Color = defaultColor) {
     this.addDate = addDate
     this.color = color
     this.level = getLevelFromEnv()
@@ -109,7 +111,9 @@ export class Logger {
     min = min < 10 ? '0' + min.toString() : min
     sec = sec < 10 ? '0' + sec.toString() : sec
 
-    return this.color.gray(`${now.getFullYear()}-${mon}-${date} ${hour}:${min}:${sec}`)
+    return this.color.gray(
+      `${now.getFullYear()}-${mon}-${date} ${hour}:${min}:${sec}`
+    )
   }
 
   private time(): string {
@@ -122,13 +126,18 @@ export class Logger {
     hour = hour < 10 ? '0' + hour.toString() : hour
     min = min < 10 ? '0' + min.toString() : min
     sec = sec < 10 ? '0' + sec.toString() : sec
-    mils = mils < 100 ? mils < 10 ? '00' + mils.toString() : '0' + mils.toString() : mils
+    mils =
+      mils < 100
+        ? mils < 10
+          ? '00' + mils.toString()
+          : '0' + mils.toString()
+        : mils
 
     return this.color.gray(`${hour}:${min}:${sec}.${mils}`)
   }
 
-  private mergeMsgs(msg: string, msgs: T[]): string {
-    msgs.forEach(v => {
+  private mergeMsgs(msg: string, msgs: MsgArg[]): string {
+    msgs.forEach((v) => {
       msg += ' ' + v.toString()
     })
     return msg
@@ -138,40 +147,48 @@ export class Logger {
     return `${this._time()} ${this.prefixes[level]} ${this.color.cyan('>')}`
   }
 
-  trace(...msgs: T[]) {
+  trace(...msgs: MsgArg[]) {
     if (LoggerLevel.TRACE >= this.level) {
       console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.TRACE), msgs))
     }
   }
 
-  debug(...msgs: T[]) {
+  debug(...msgs: MsgArg[]) {
     if (LoggerLevel.DEBUG >= this.level) {
       console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.DEBUG), msgs))
     }
   }
 
-  info(...msgs: T[]) {
+  info(...msgs: MsgArg[]) {
     if (LoggerLevel.INFO >= this.level) {
       console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.INFO), msgs))
     }
   }
 
-  error(...msgs: T[]) {
+  error(...msgs: MsgArg[]) {
     if (LoggerLevel.ERROR >= this.level) {
       console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.ERROR), msgs))
     }
   }
 
-  warn(...msgs: T[]) {
+  warn(...msgs: MsgArg[]) {
     if (LoggerLevel.WARNING >= this.level) {
       console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.WARNING), msgs))
     }
   }
 
-  fatal(...msgs: T[]): never {
+  fatal(...msgs: MsgArg[]): never {
     console.log(this.mergeMsgs(this.baseMsg(LoggerLevel.FATAL), msgs))
     return process.exit(1)
   }
 }
 
 export const log = new Logger()
+
+export const trace = (...msgs: MsgArg[]) => log.trace(...msgs)
+export const debug = (...msgs: MsgArg[]) => log.debug(...msgs)
+export const info = (...msgs: MsgArg[]) => log.info(...msgs)
+export const warn = (...msgs: MsgArg[]) => log.warn(...msgs)
+export const warning = warn
+export const error = (...msgs: MsgArg[]) => log.error(...msgs)
+export const fatal = (...msgs: MsgArg[]) => log.fatal(...msgs)

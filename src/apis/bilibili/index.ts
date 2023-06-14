@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Base, color, logger } from '..'
+import { defaultColor as color, info, fatal } from '../../logger'
+import { Base } from '..'
 
 interface CDNItem {
   host: string;
@@ -42,13 +42,13 @@ interface Response {
 export class Bilibili extends Base {
   baseURL =
     'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8&dolby=5&panorama=1&room_id='
-  private readonly pageURL?: string
+  private readonly pageURL: string = ''
 
-  constructor(roomID: number, url?: string) {
+  constructor(roomID: number, url = '') {
     super(roomID ? roomID : 0)
 
     if (!roomID && !url) {
-      logger.fatal('房间号和房间页面链接必需传入一个')
+      fatal('房间号和房间页面链接必需传入一个')
     }
 
     this.pageURL = url
@@ -59,7 +59,7 @@ export class Bilibili extends Base {
   }
 
   private async parseRoomID() {
-    const res = await this.get(this.pageURL!, {
+    const res = await this.get(this.pageURL, {
       Host: 'live.bilibili.com',
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0',
@@ -76,10 +76,12 @@ export class Bilibili extends Base {
       'Sec-GPC': '1'
     })
 
-    let findResult = res.match(/"defaultRoomId":"(\d+)"/)!
+    let findResult = res.match(/"defaultRoomId":"(\d+)"/)
     if (!findResult) {
-      findResult = res.match(/"roomid":(\d+)/)!
+      findResult = res.match(/"roomid":(\d+)/)
     }
+
+    if (!findResult) throw Error('未找到房间 id')
 
     return Number(findResult[1])
   }
@@ -92,10 +94,10 @@ export class Bilibili extends Base {
     const res = await this.get(this.roomURL)
     const body = JSON.parse(res) as Response
     if (body.code !== 0) {
-      logger.fatal(body.message)
+      fatal(body.message)
     }
 
-    logger.info('已获取到正确响应', res)
+    info('已获取到正确响应', res)
 
     return body
   }
@@ -111,7 +113,7 @@ export class Bilibili extends Base {
           fmt.codec.forEach((c) => {
             c.url_info.forEach((cdn) => {
               if (cdn.host.startsWith('https://d1--cn-')) {
-                logger.info('跳过 "https://d1--cn-" 开头的链接')
+                info('跳过 "https://d1--cn-" 开头的链接')
                 return
               }
 
@@ -123,7 +125,7 @@ export class Bilibili extends Base {
             })
           })
         } else {
-          logger.info('跳过 flv')
+          info('跳过 flv')
         }
       })
     })

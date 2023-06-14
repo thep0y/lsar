@@ -1,6 +1,15 @@
 import { createHash } from 'crypto'
 import { CDNS, DOUYU_PROXY } from './consts'
-import { Base, color, logger } from '..'
+import {
+  trace,
+  debug,
+  info,
+  warn,
+  error,
+  fatal,
+  defaultColor as color
+} from '../../logger'
+import { Base } from '..'
 
 const did = '10000000000000000000000000001501'
 
@@ -56,24 +65,24 @@ export class Douyu extends Base {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.finalRoomID}`
       resp = await this.post(url, params)
       if (!resp) {
-        logger.warn('POST 请求未功能获得响应，更换 GET 请求重试')
+        warn('POST 请求未功能获得响应，更换 GET 请求重试')
         return null
       }
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.finalRoomID}?${params}`
       resp = await this.get(url)
       if (!resp) {
-        logger.warn('GET 请求未功能获得响应，更换 POST 请求重试')
+        warn('GET 请求未功能获得响应，更换 POST 请求重试')
         return null
       }
     }
 
     const info = JSON.parse(resp) as Info
 
-    logger.debug('有效响应体：', infoString(info))
+    debug('有效响应体：', infoString(info))
 
     if (Object.hasOwn(info, 'error') && info.msg === NOT_LIVING_STATE) {
-      return logger.fatal(`${this.roomID} ${NOT_LIVING_STATE}`)
+      return fatal(`${this.roomID} ${NOT_LIVING_STATE}`)
     }
 
     return info
@@ -85,8 +94,9 @@ export class Douyu extends Base {
   }
 
   private matchSignFunc(html: string) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const matchResult = html.match(this.ub98484234Reg)!
+    const matchResult = html.match(this.ub98484234Reg)
+    if (matchResult == null) throw Error('没找到函数 ub98484234')
+
     let ub98484234 = matchResult[0]
     ub98484234 = ub98484234.replace(/eval\(strc\)\(\w+,\w+,.\w+\);/, 'strc;')
     const ts = Math.floor(new Date().getTime() / 1e3)
@@ -99,8 +109,9 @@ export class Douyu extends Base {
       if (slices[slices.length - 1] === 'defined') {
         const lossStr = `/var ${slices[0]}=.*?];/`
         const lossReg = new RegExp(eval(lossStr) as string)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const matchResult = html.match(lossReg)!
+        const matchResult = html.match(lossReg)
+        if (matchResult == null) throw Error('没找到函数 ub98484234')
+
         signFunc = eval(ub98484234 + matchResult[0] + ub98484234Call) as string
       }
     }
@@ -111,7 +122,7 @@ export class Douyu extends Base {
     const md5 = hash.digest('hex')
     signFunc = signFunc.replace(/CryptoJS\.MD5\(cb\)\.toString\(\)/, `"${md5}"`)
     signFunc = signFunc.split('return rt;})')[0] + 'return rt;})'
-    logger.trace(signFunc)
+    trace(signFunc)
     return signFunc
   }
 
@@ -129,19 +140,19 @@ export class Douyu extends Base {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.finalRoomID = Number(r[1].replaceAll(',', ''))
 
-        logger.info('在网页中解析到最终房间 id：', this.finalRoomID)
+        info('在网页中解析到最终房间 id：', this.finalRoomID)
       }
 
       this.signFunc = this.matchSignFunc(html)
     }
     const ts = Math.floor(new Date().getTime() / 1e3)
     const params = this.createParams(ts)
-    logger.debug('请求参数：', params)
+    debug('请求参数：', params)
 
     return params
   }
 
-  private async getLiveName() {
+  private async getLiveName(params: string) {
     /*
             码率或清晰度
                 - 900 高清
@@ -151,21 +162,11 @@ export class Douyu extends Base {
             添加码率后的文件名为 {name}_{bit}.flv 或 {name}_{bit}.xs，
             不添加码率就会播放最高码率
         */
-
-    const params = await this.params()
-
-    const mobileStream = await this.getMobileStream(params)
-    if (mobileStream) {
-      console.log('优选：手机播放流\n')
-      console.log(color.gray(mobileStream))
-      console.log('\n')
-    }
-
     const info = await this.series(params)
     let link_name = ''
     if (info && info.error !== -15) {
       if (info.data.rtmp_live == undefined) {
-        logger.fatal(`${this.finalRoomID} 房间未开播`)
+        fatal(`${this.finalRoomID} 房间未开播`)
       }
       link_name = info.data.rtmp_live.split('?')[0].split('.')[0].split('_')[0]
     } else {
@@ -176,12 +177,12 @@ export class Douyu extends Base {
       this.isPost = !this.isPost
       const info = await this.series(params)
       if (!info) {
-        logger.fatal(
+        fatal(
           '更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序'
         )
       } else {
         if (info.data.rtmp_live == undefined) {
-          logger.fatal(`${this.finalRoomID} 房间未开播`)
+          fatal(`${this.finalRoomID} 房间未开播`)
         }
         link_name = info.data.rtmp_live
           .split('?')[0]
@@ -193,7 +194,7 @@ export class Douyu extends Base {
   }
 
   private async getRoomPage() {
-    logger.debug('当前房间链接：', this.roomURL)
+    debug('当前房间链接：', this.roomURL)
     return await this.get(this.roomURL)
   }
 
@@ -207,7 +208,7 @@ export class Douyu extends Base {
     const mr = JSON.parse(resp) as MobileResponse
 
     if (mr.error !== 0) {
-      logger.error('获取手机播放流出错：', mr.msg)
+      error('获取手机播放流出错：', mr.msg)
       return
     }
 
@@ -215,7 +216,16 @@ export class Douyu extends Base {
   }
 
   async printLiveLink(): Promise<void> {
-    const name = await this.getLiveName()
+    const params = await this.params()
+
+    const mobileStream = await this.getMobileStream(params)
+    if (mobileStream) {
+      console.log('优选：手机播放流\n')
+      console.log(color.gray(mobileStream))
+      console.log('\n')
+    }
+
+    const name = await this.getLiveName(params)
 
     console.log('\n次选：选择下面的任意一条链接，播放失败换其他链接试试\n')
 
