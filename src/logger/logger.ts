@@ -49,18 +49,18 @@ const getLevelFromEnv = (): LoggerLevel => {
   }
 
   switch (level) {
-  case '1':
-    return LoggerLevel.TRACE
-  case '2':
-    return LoggerLevel.DEBUG
-  case '3':
-    return LoggerLevel.INFO
-  case '5':
-    return LoggerLevel.ERROR
-  case '6':
-    return LoggerLevel.TRACE
-  default:
-    return LoggerLevel.WARNING
+    case '1':
+      return LoggerLevel.TRACE
+    case '2':
+      return LoggerLevel.DEBUG
+    case '3':
+      return LoggerLevel.INFO
+    case '5':
+      return LoggerLevel.ERROR
+    case '6':
+      return LoggerLevel.TRACE
+    default:
+      return LoggerLevel.WARNING
   }
 }
 
@@ -86,7 +86,7 @@ export class Logger {
       3: this.color.green('INF'),
       4: this.color.yellow('WAR'),
       5: this.color.red('ERR'),
-      6: this.color.red('FAT')
+      6: this.color.red('FAT'),
     }
   }
 

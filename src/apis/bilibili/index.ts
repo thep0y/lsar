@@ -2,14 +2,14 @@ import { defaultColor as color, info, fatal } from '../../logger'
 import { Base } from '..'
 
 interface CDNItem {
-  host: string;
+  host: string
 }
 
 interface CodecItem {
-  accept_qn: number[];
-  base_url: string;
-  current_qn: number;
-  url_info: CDNItem[];
+  accept_qn: number[]
+  base_url: string
+  current_qn: number
+  url_info: CDNItem[]
 }
 
 enum Format {
@@ -19,24 +19,24 @@ enum Format {
 }
 
 interface FormatItem {
-  codec: CodecItem[];
-  format_name: string;
+  codec: CodecItem[]
+  format_name: string
 }
 
 interface StreamItem {
-  format: FormatItem[];
+  format: FormatItem[]
 }
 
 interface Response {
-  code: number;
-  message: string;
+  code: number
+  message: string
   data: {
     playurl_info: {
       playurl: {
-        stream: StreamItem[];
-      };
-    };
-  };
+        stream: StreamItem[]
+      }
+    }
+  }
 }
 
 export class Bilibili extends Base {
@@ -73,7 +73,7 @@ export class Bilibili extends Base {
       'Sec-Fetch-Site': 'none',
       'Sec-Fetch-User': '?1',
       DNT: '1',
-      'Sec-GPC': '1'
+      'Sec-GPC': '1',
     })
 
     let findResult = res.match(/"defaultRoomId":"(\d+)"/)

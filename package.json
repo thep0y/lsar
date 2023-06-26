@@ -7,25 +7,29 @@
   "author": "thepoy <thepoy@163.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && cross-env LOG_LEVEL=2 node ./dist/main.js",
+    "dev": "tsc && cross-env LOG_LEVEL=1 node ./dist/main.js",
+    "stage": "tsc && cross-env LOG_LEVEL=5 node ./dist/main.js",
     "build": "tsc && node ./dist/build.js"
   },
   "bin": {
     "lsar": "./dist/main.js"
   },
   "dependencies": {
-    "commander": "^10.0.1",
+    "commander": "^11.0.0",
     "superagent": "^8.0.9"
   },
   "devDependencies": {
     "@types/node": "^20.3.1",
     "@types/superagent": "4.1.18",
-    "@typescript-eslint/eslint-plugin": "^5.59.11",
-    "@typescript-eslint/parser": "^5.59.11",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.42.0",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin": "^1.0.1",
     "eslint-plugin-eslint-plugin": "^5.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
     "typescript": "^5.1.3"
   }
 }

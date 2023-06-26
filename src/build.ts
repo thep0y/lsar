@@ -9,7 +9,7 @@ const isWindows = os.platform() == 'win32'
 const getVersion = (): string => {
   const content = fs.readFileSync('./package.json')
   const { version } = JSON.parse(content.toString('utf-8')) as {
-    version: string;
+    version: string
   }
   return version
 }

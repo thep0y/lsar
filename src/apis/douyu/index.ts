@@ -1,51 +1,46 @@
 import { createHash } from 'crypto'
 import { CDNS, DOUYU_PROXY } from './consts'
-import {
-  trace,
-  debug,
-  info,
-  warn,
-  error,
-  fatal,
-  defaultColor as color
-} from '../../logger'
-import { Base } from '..'
+import { trace, debug, info, warn, error, fatal } from '../../logger'
+import { Base, printLink } from '..'
 
 const did = '10000000000000000000000000001501'
 
 interface Info {
-  error?: number;
-  msg: string;
+  error?: number
+  msg: string
   data: {
-    rtmp_live: string;
-  };
+    rtmp_url: string
+    rtmp_live: string
+  }
 }
 
 interface MobileResponse {
-  error: number;
-  msg: string;
+  error: number
+  msg: string
   data: {
-    url: string;
-  };
+    url: string
+  }
 }
 
 const infoString = (info: Info): string => {
   const {
     error,
     msg,
-    data: { rtmp_live }
+    data: { rtmp_url, rtmp_live },
   } = info
   return JSON.stringify({
     error,
     msg,
-    rtmp_live
+    rtmp_url,
+    rtmp_live,
   })
 }
 
 const NOT_LIVING_STATE = '房间未开播'
+const INVALID_REQUEST = '非法请求'
 
 export class Douyu extends Base {
-  private isPost = false
+  private isPost = true
   private ub98484234Reg = new RegExp(
     /var vdwdae325w_64we.*?function ub98484234\(.*?return eval\(strc\)\(.*?\);\}/
   )
@@ -81,8 +76,12 @@ export class Douyu extends Base {
 
     debug('有效响应体：', infoString(info))
 
-    if (Object.hasOwn(info, 'error') && info.msg === NOT_LIVING_STATE) {
-      return fatal(`${this.roomID} ${NOT_LIVING_STATE}`)
+    if (Object.hasOwn(info, 'error')) {
+      if (info.msg === NOT_LIVING_STATE) {
+        return fatal(`${this.roomID} ${NOT_LIVING_STATE}`)
+      } else if (info.msg === INVALID_REQUEST) {
+        error(INVALID_REQUEST)
+      }
     }
 
     return info
@@ -115,7 +114,6 @@ export class Douyu extends Base {
         signFunc = eval(ub98484234 + matchResult[0] + ub98484234Call) as string
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const v = signFunc.match(/\w{12}/)!
     const hash = createHash('md5')
     hash.update(`${this.finalRoomID}${did}${ts}${v[0]}`)
@@ -137,7 +135,6 @@ export class Douyu extends Base {
 
       const r = html.match(/\?room_id=(.+?)"/)
       if (r) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         this.finalRoomID = Number(r[1].replaceAll(',', ''))
 
         info('在网页中解析到最终房间 id：', this.finalRoomID)
@@ -162,7 +159,7 @@ export class Douyu extends Base {
             添加码率后的文件名为 {name}_{bit}.flv 或 {name}_{bit}.xs，
             不添加码率就会播放最高码率
         */
-    const info = await this.series(params)
+    let info = await this.series(params)
     let link_name = ''
     if (info && info.error !== -15) {
       if (info.data.rtmp_live == undefined) {
@@ -175,7 +172,7 @@ export class Douyu extends Base {
                所以这里请求失败时修改，但也只修改一次请求方式，如果仍失败就需要重新执行
             */
       this.isPost = !this.isPost
-      const info = await this.series(params)
+      info = await this.series(params)
       if (!info) {
         fatal(
           '更换请求方式、生成新请求参数后仍未得到正确响应，请重新运行几次程序'
@@ -190,6 +187,13 @@ export class Douyu extends Base {
           .split('_')[0]
       }
     }
+
+    printLink({
+      tooltip: 'PC播放流',
+      link: `${info!.data.rtmp_url}/${info!.data.rtmp_live}`,
+      suffix: '\n',
+    })
+
     return link_name
   }
 
@@ -220,9 +224,8 @@ export class Douyu extends Base {
 
     const mobileStream = await this.getMobileStream(params)
     if (mobileStream) {
-      console.log('优选：手机播放流\n')
-      console.log(color.gray(mobileStream))
-      console.log('\n')
+      console.log('优选：\n')
+      printLink({ tooltip: '手机播放流', link: mobileStream, suffix: '' })
     }
 
     const name = await this.getLiveName(params)
@@ -235,12 +238,12 @@ export class Douyu extends Base {
 
         if (format.flv) {
           const flv_link = `${link}flv`
-          console.log(color.gray(flv_link))
+          printLink({ link: flv_link })
         }
 
         if (format.m3u8) {
           const m3u8_link = `${link}m3u8`
-          console.log(color.gray(m3u8_link))
+          printLink({ link: m3u8_link })
         }
 
         console.log('\n')
@@ -249,6 +252,6 @@ export class Douyu extends Base {
 
     console.log('\n末选：上面 cdn 均不可用时，用下面的代理试试：\n')
     const proxy = DOUYU_PROXY + this.roomID.toString()
-    console.log(color.gray(proxy), '\n')
+    printLink({ link: proxy })
   }
 }

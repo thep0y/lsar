@@ -1,5 +1,11 @@
 import { get, post, SuperAgentRequest } from 'superagent'
-import { trace, debug, info, error, fatal } from '../logger/logger'
+import {
+  trace,
+  debug,
+  error,
+  fatal,
+  defaultColor as color,
+} from '../logger/logger'
 
 export abstract class Base {
   roomID: number
@@ -33,8 +39,6 @@ export abstract class Base {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   async get(url: string, headers?: { [key: string]: string }): Promise<string> {
     debug('GET 正在访问的链接：', url)
 
@@ -53,8 +57,6 @@ export abstract class Base {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   async post(url: string, params: string): Promise<string> {
     debug('POST 正在访问的链接：', url, '使用的参数', params)
     return await this.request(
@@ -67,6 +69,20 @@ export abstract class Base {
         .send(params)
     )
   }
+}
+
+interface Link {
+  link: string
+  tooltip?: string
+  suffix?: string
+}
+
+export const printLink = ({ link, tooltip, suffix }: Link) => {
+  if (typeof tooltip === 'string') console.log(tooltip)
+
+  console.log(color.gray(link))
+
+  if (typeof suffix === 'string') console.log(suffix)
 }
 
 export * from './douyu'

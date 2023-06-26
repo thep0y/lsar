@@ -30,8 +30,8 @@ program
   })
 
 interface BiliArg {
-  roomID: number;
-  url?: string;
+  roomID: number
+  url?: string
 }
 
 program
