@@ -67,7 +67,7 @@ yarn global bin
 
 ![image-20230224232749223](https://i.imgtg.com/2023/02/24/s9bBq.png)
 
-**问题反馈**
+## 问题反馈
 
 建议使用[mpv](https://mpv.io)播放视频，出现错误时可方便地上传日志。
 
