@@ -6,9 +6,9 @@
 
 运行本软件需要 node 运行环境，可通下以下链接下载：
 
-- [Windows x64](https://nodejs.org/dist/v18.14.2/node-v18.14.2-x64.msi)
-- [macOS](https://nodejs.org/dist/v18.14.2/node-v18.14.2.pkg)
-- Linux x64 就不放了，用的 Linux 的人，怎么会是小白？
+- [Windows x64](https://registry.npmmirror.com/-/binary/node/latest-v18.x/node-v18.17.0-x64.msi)
+- [macOS](https://registry.npmmirror.com/-/binary/node/latest-v18.x/node-v18.17.0.pkg)
+- Linux 就不放了，用的 Linux 的人，怎么会是小白？
 
 下载好后双击安装即可，安装过程可以参考：https://www.runoob.com/nodejs/nodejs-install-setup.html。
 
@@ -21,7 +21,7 @@ node -v
 正常的话应该会显示：
 
 ```
-v18.14.2
+v18.17.0
 ```
 
 ## 2 配置包管理器
