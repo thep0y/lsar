@@ -1,6 +1,6 @@
 {
   "name": "lsar",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Live Source Address Resolution",
   "main": "./dist/main.js",
   "repository": "https://github.com/thep0y/lasr",
