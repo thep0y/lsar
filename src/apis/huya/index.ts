@@ -5,6 +5,7 @@ import { error } from 'console'
 
 const cdn = {
   AL: '阿里',
+  AL13: '阿里13',
   TX: '腾讯',
   HW: '华为',
   HS: '火山',
@@ -34,6 +35,8 @@ interface RoomInfo {
   roomInfo?: {
     eLiveStatus: number
     tLiveInfo: {
+      lProfileRoom: number
+      sRoomName: string
       tLiveStreamInfo: {
         vStreamInfo: {
           value: RoomStream[]
@@ -53,14 +56,32 @@ interface StreamResult {
 
 export class Huya extends Base {
   baseURL = 'https://m.huya.com/'
+  private pageURL: string
+
+  constructor(roomID: number, url = '') {
+    super(roomID ? roomID : 0)
+
+    if (!roomID && !url) {
+      fatal('房间号和房间页面链接必需传入一个')
+    }
+
+    this.pageURL = url
+  }
 
   get roomURL(): string {
     return this.baseURL + this.roomID.toString()
   }
 
   private async getRoomInfo() {
-    trace('获取直播间页面信息', this.roomURL)
-    const resp = await this.get(this.roomURL, {
+    let url: string
+    if (this.roomID) {
+      url = this.roomURL
+    } else {
+      url = this.pageURL
+    }
+
+    trace('获取直播间页面信息', url)
+    const resp = await this.get(url, {
       'Content-Type': 'application/x-www-form-urlencoded',
       'User-Agent':
         'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)' +
@@ -180,8 +201,9 @@ export class Huya extends Base {
     if (ri.roomInfo.eLiveStatus === 2) {
       const stream = await this.getLives(ri)
       console.log(
-        '解析完成，任选一条下面的播放源，卡顿时可尝试切换其他播放源：\n'
+        '解析完成，任选一条下面的播放源，卡顿时可尝试切换其他播放源\n'
       )
+      console.log('房间名:', ri.roomInfo.tLiveInfo.sRoomName)
       console.log(stream)
       return
     }

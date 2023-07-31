@@ -52,14 +52,14 @@ type HuyaArg = BiliArg
 
 program
   .command('huya')
-  .description('解析虎牙直播源。目前仅支持使用房间号')
+  .description('解析虎牙直播源。')
   .option('-r, --roomID <roomID>', '目标房间号', myParseInt)
-  // .option('-u, --url <pageURL>', '房间页面链接')
+  .option('-u, --url <pageURL>', '房间页面链接')
   .action((arg: HuyaArg) => {
     if (arg.roomID === undefined && arg.url === undefined) {
       fatal('参数错误，请查阅 -h/--help 以正确传递参数')
     }
-    const h = new Huya(arg.roomID)
+    const h = new Huya(arg.roomID, arg.url)
     h.printLiveLink().catch((e) => {
       console.log(e)
     })
