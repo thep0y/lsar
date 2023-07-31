@@ -138,7 +138,14 @@ export class Logger {
 
   private mergeMsgs(msg: string, msgs: MsgArg[]): string {
     msgs.forEach((v) => {
-      msg += ' ' + v.toString()
+      const arg = typeof v === 'string' ? v.trim() : v.toString().trim()
+      const pure = arg.replaceAll('\n', '').replaceAll(' ', '')
+      const len = pure.length
+      if (len > 30) {
+        msg += ` ${pure.slice(0, 30)}...(too long, length: ${len})`
+      } else {
+        msg += ' ' + pure
+      }
     })
     return msg
   }

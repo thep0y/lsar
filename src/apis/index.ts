@@ -57,7 +57,7 @@ export abstract class Base {
     )
   }
 
-  async post(url: string, params: string): Promise<string> {
+  async post(url: string, params: string, type = 'form'): Promise<string> {
     debug('POST 正在访问的链接：', url, '使用的参数', params)
     return await this.request(
       post(url)
@@ -65,7 +65,7 @@ export abstract class Base {
           response: 5000,
           deadline: 60000,
         })
-        .type('form')
+        .type(type)
         .send(params)
     )
   }
@@ -83,6 +83,13 @@ export const printLink = ({ link, tooltip, suffix }: Link) => {
   console.log(color.gray(link))
 
   if (typeof suffix === 'string') console.log(suffix)
+}
+
+export const isType = <T extends object>(
+  key: string,
+  obj: object
+): obj is T => {
+  return key in obj
 }
 
 export * from './douyu'

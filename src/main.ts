@@ -1,5 +1,6 @@
 import { Command, InvalidArgumentError } from 'commander'
 import { Douyu, Bilibili } from './apis'
+import { Huya } from './apis/huya'
 
 const program = new Command()
 
@@ -44,6 +45,14 @@ program
     c.printLiveLink().catch((e) => {
       console.log(e)
     })
+  })
+
+program
+  .command('huya')
+  .argument('<roomID>', '目标房间号（支持靓号）', myParseInt)
+  .action((rid: number) => {
+    const h = new Huya(rid)
+    h.printLiveLink()
   })
 
 program.parse(process.argv)
