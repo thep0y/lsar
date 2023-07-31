@@ -1,5 +1,7 @@
 import * as os from 'os'
+import * as path from 'path'
 import * as fs from 'fs'
+import * as UglifyJS from 'uglify-js'
 import { log } from './logger/logger'
 
 const mainPath = './dist/main.js'
@@ -12,6 +14,22 @@ const getVersion = (): string => {
     version: string
   }
   return version
+}
+
+const distDir = './dist'
+
+// const clearFiles = () => {
+//   const jsFiles = fs.readdirSync(distDir)
+//   jsFiles.forEach((v) => {
+//     fs.unlinkSync(path.join(distDir, v))
+//   })
+// }
+
+const ujOptions = {
+  mangle: {
+    toplevel: true,
+  },
+  nameCache: {},
 }
 
 fs.readFile(mainPath, (err, data) => {
@@ -39,3 +57,21 @@ if (!isWindows) {
     })
   })
 }
+
+const jsFiles = fs.readdirSync(distDir)
+const getContent = (file: string) => {
+  return UglifyJS.minify(fs.readFileSync(file, 'utf-8'), ujOptions).code
+}
+
+jsFiles.forEach((v) => {
+  if (v == 'build.js' || !v.endsWith('.js')) return
+
+  const file = path.join(distDir, v)
+  const code = getContent(file)
+
+  fs.writeFile(file, code, 'utf-8', (err) => {
+    if (err) log.error(err)
+  })
+})
+
+fs.unlinkSync(path.join(distDir, 'build.js'))
