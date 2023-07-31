@@ -31,7 +31,7 @@ interface Hls extends BaseStream {
 type RoomStream = Flv | Hls
 
 interface RoomInfo {
-  roomInfo: {
+  roomInfo?: {
     eLiveStatus: number
     tLiveInfo: {
       tLiveStreamInfo: {
@@ -41,7 +41,7 @@ interface RoomInfo {
       }
     }
   }
-  roomProfile: {
+  roomProfile?: {
     liveLineUrl: string
   }
 }
@@ -151,7 +151,7 @@ export class Huya extends Base {
     const streamInfo = { flv: {}, hls: {} } as StreamResult
     const uid = await this.getAnonymousUid()
 
-    for (const s of ri.roomInfo.tLiveInfo.tLiveStreamInfo.vStreamInfo.value) {
+    for (const s of ri.roomInfo!.tLiveInfo.tLiveStreamInfo.vStreamInfo.value) {
       if (isType<Flv>('sFlvUrl', s)) {
         const anticode = this.parseAnticode(s.sFlvAntiCode, uid, s.sStreamName)
         const url = `${s.sFlvUrl}/${s.sStreamName}.${s.sFlvUrlSuffix}?${anticode}`
@@ -170,6 +170,12 @@ export class Huya extends Base {
 
   async printLiveLink(): Promise<void> {
     const ri = await this.getRoomInfo()
+
+    debug('房间信息', JSON.stringify(ri))
+
+    if (ri.roomInfo === undefined) {
+      return fatal('此房间未开播', this.roomID)
+    }
 
     if (ri.roomInfo.eLiveStatus === 2) {
       const stream = await this.getLives(ri)

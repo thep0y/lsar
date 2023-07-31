@@ -1,6 +1,7 @@
 import { Command, InvalidArgumentError } from 'commander'
 import { Douyu, Bilibili } from './apis'
 import { Huya } from './apis/huya'
+import { fatal } from './logger'
 
 const program = new Command()
 
@@ -55,6 +56,9 @@ program
   .option('-r, --roomID <roomID>', '目标房间号', myParseInt, 0)
   // .option('-u, --url <pageURL>', '房间页面链接')
   .action((arg: HuyaArg) => {
+    if (arg.roomID === 0 && arg.url === undefined) {
+      fatal('房间号错误，请查阅 --help 以正确传递参数')
+    }
     const h = new Huya(arg.roomID)
     h.printLiveLink().catch((e) => {
       console.log(e)

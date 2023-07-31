@@ -70,6 +70,7 @@ interface Arg {
   addDate?: boolean
   color?: Color
   level?: LoggerLevel
+  maxLength?: number
 }
 
 /**
@@ -80,11 +81,18 @@ export class Logger {
   private addDate = false
   private level: LoggerLevel
   private prefixes: Record<LoggerLevel, string>
+  private maxLength: number | undefined = undefined
 
-  constructor({ addDate = false, color = defaultColor, level }: Arg) {
+  constructor({
+    addDate = false,
+    color = defaultColor,
+    level,
+    maxLength,
+  }: Arg) {
     this.addDate = addDate
     this.color = color
     this.level = level ?? getLevelFromEnv()
+    this.maxLength = maxLength
 
     this.prefixes = {
       1: this.color.gray('TRC'),
@@ -143,14 +151,26 @@ export class Logger {
   }
 
   private mergeMsgs(msg: string, msgs: MsgArg[]): string {
-    msgs.forEach((v) => {
-      const arg = typeof v === 'string' ? v.trim() : v.toString().trim()
-      const pure = arg.replaceAll('\n', '').replaceAll(' ', '')
-      const len = pure.length
-      if (len > 30) {
-        msg += ` ${pure.slice(0, 30)}...(too long, length: ${len})`
+    msgs.forEach((v, i) => {
+      if (!this.maxLength) {
+        const arg = typeof v === 'string' ? v.trim() : v.toString().trim()
+        msg += ` ${arg}`
       } else {
-        msg += ' ' + pure
+        const arg = typeof v === 'string' ? v.trim() : v.toString().trim()
+        const pure =
+          i > 0
+            ? arg.replaceAll('\n', '').replaceAll(' ', '')
+            : arg.replaceAll('\n', '')
+        const len = pure.length
+
+        if (len > this.maxLength) {
+          msg += ` ${pure.slice(
+            0,
+            this.maxLength
+          )}...(too long, length: ${len})`
+        } else {
+          msg += ' ' + pure
+        }
       }
     })
     return msg
@@ -196,7 +216,7 @@ export class Logger {
   }
 }
 
-export const log = new Logger({})
+export const log = new Logger({ maxLength: 30 })
 
 export const trace = (...msgs: MsgArg[]) => log.trace(...msgs)
 export const debug = (...msgs: MsgArg[]) => log.debug(...msgs)

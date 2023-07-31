@@ -84,7 +84,7 @@ const getAllJsFiles = () => {
 }
 
 const jsFiles = getAllJsFiles()
-log.info('dist 目录文件', jsFiles)
+log.info('dist 目录文件', JSON.stringify(jsFiles))
 
 const getContent = (file: string) => {
   return UglifyJS.minify(fs.readFileSync(file, 'utf-8'), ujOptions).code
