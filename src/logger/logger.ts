@@ -66,6 +66,12 @@ const getLevelFromEnv = (): LoggerLevel => {
 
 export const defaultColor = new Color()
 
+interface Arg {
+  addDate?: boolean
+  color?: Color
+  level?: LoggerLevel
+}
+
 /**
  * 彩色日志
  */
@@ -75,10 +81,10 @@ export class Logger {
   private level: LoggerLevel
   private prefixes: Record<LoggerLevel, string>
 
-  constructor(addDate = false, color: Color = defaultColor) {
+  constructor({ addDate = false, color = defaultColor, level }: Arg) {
     this.addDate = addDate
     this.color = color
-    this.level = getLevelFromEnv()
+    this.level = level ?? getLevelFromEnv()
 
     this.prefixes = {
       1: this.color.gray('TRC'),
@@ -190,7 +196,7 @@ export class Logger {
   }
 }
 
-export const log = new Logger()
+export const log = new Logger({})
 
 export const trace = (...msgs: MsgArg[]) => log.trace(...msgs)
 export const debug = (...msgs: MsgArg[]) => log.debug(...msgs)
