@@ -65,7 +65,7 @@ yarn global bin
 
 编译安装后在 npm 的全局 bin 目录中会有一个`lsar`命令，传入房间号即可解析出直播源：
 
-![image-20230224232749223](https://i.imgtg.com/2023/02/24/s9bBq.png)
+![截屏2023-07-31 11.37.55](https://i.imgtg.com/2023/07/31/Oi3fnp.png)
 
 ## 问题反馈
 
