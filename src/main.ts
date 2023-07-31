@@ -47,12 +47,18 @@ program
     })
   })
 
+type HuyaArg = BiliArg
+
 program
   .command('huya')
-  .argument('<roomID>', '目标房间号（支持靓号）', myParseInt)
-  .action((rid: number) => {
-    const h = new Huya(rid)
-    h.printLiveLink()
+  .description('解析虎牙直播源。目前仅支持使用房间号')
+  .option('-r, --roomID <roomID>', '目标房间号', myParseInt, 0)
+  // .option('-u, --url <pageURL>', '房间页面链接')
+  .action((arg: HuyaArg) => {
+    const h = new Huya(arg.roomID)
+    h.printLiveLink().catch((e) => {
+      console.log(e)
+    })
   })
 
 program.parse(process.argv)
