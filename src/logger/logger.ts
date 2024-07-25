@@ -137,24 +137,25 @@ export class Logger {
     let min: string | number = now.getMinutes();
     let sec: string | number = now.getSeconds();
     let mils: string | number = now.getMilliseconds();
-    hour = hour < 10 ? "0" + hour.toString() : hour;
-    min = min < 10 ? "0" + min.toString() : min;
-    sec = sec < 10 ? "0" + sec.toString() : sec;
+    hour = hour < 10 ? `0${hour.toString()}` : hour;
+    min = min < 10 ? `0${min.toString()}` : min;
+    sec = sec < 10 ? `0${sec.toString()}` : sec;
     mils =
       mils < 100
         ? mils < 10
-          ? "00" + mils.toString()
-          : "0" + mils.toString()
+          ? `00${mils.toString()}`
+          : `0${mils.toString()}`
         : mils;
 
     return this.color.gray(`${hour}:${min}:${sec}.${mils}`);
   }
 
   private mergeMsgs(msg: string, msgs: MsgArg[]): string {
+    let m = msg;
     msgs.forEach((v, i) => {
       if (!this.maxLength) {
         const arg = typeof v === "string" ? v.trim() : v.toString().trim();
-        msg += ` ${arg}`;
+        m += ` ${arg}`;
       } else {
         const arg = typeof v === "string" ? v.trim() : v.toString().trim();
         const pure =
@@ -164,16 +165,13 @@ export class Logger {
         const len = pure.length;
 
         if (len > this.maxLength) {
-          msg += ` ${pure.slice(
-            0,
-            this.maxLength,
-          )}...(too long, length: ${len})`;
+          m += ` ${pure.slice(0, this.maxLength)}...(too long, length: ${len})`;
         } else {
-          msg += " " + pure;
+          m += ` ${pure}`;
         }
       }
     });
-    return msg;
+    return m;
   }
 
   private baseMsg(level: LoggerLevel): string {

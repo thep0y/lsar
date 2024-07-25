@@ -12,7 +12,8 @@
     "rules": {
       "recommended": true,
       "style": { "noNonNullAssertion": "off" },
-      "security": { "noGlobalEval": "off" }
+      "security": { "noGlobalEval": "off" },
+      "performance": { "noDelete": "off" }
     }
   }
 }
