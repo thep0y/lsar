@@ -3,7 +3,10 @@
   "version": "1.1.4",
   "description": "Live Source Address Resolution",
   "main": "./dist/main.js",
-  "repository": "https://github.com/thep0y/lasr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thep0y/lasr.git"
+  },
   "author": "thepoy <thepoy@163.com>",
   "license": "MIT",
   "scripts": {
@@ -12,7 +15,7 @@
     "build": "tsc && node ./dist/build.js"
   },
   "bin": {
-    "lsar": "./dist/main.js"
+    "lsar": "dist/main.js"
   },
   "dependencies": {
     "commander": "^11.1.0",
