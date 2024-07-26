@@ -138,7 +138,7 @@ export class Douyu extends Base {
     if (!this.signFunc) {
       const html = await this.getRoomPage();
 
-      const r = html.match(/\$ROOM.room_id = (\d+);/);
+      const r = html.match(/\$ROOM.room_id = ?(\d+);/); // 有的房间号前有1个空格, 有的无空格
       if (r) {
         debug("正则查找房间 id 结果：", r[1]);
         this.finalRoomID = Number(r[1]);
