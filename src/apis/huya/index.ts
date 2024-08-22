@@ -1,7 +1,6 @@
-import { debug, fatal, trace } from "../../logger";
+import { debug, info, fatal, trace } from "../../logger";
 import { Base } from "..";
 import { createHash } from "node:crypto";
-import { info } from "node:console";
 
 interface CacheProfileOffData {
   liveStatus: "OFF";
