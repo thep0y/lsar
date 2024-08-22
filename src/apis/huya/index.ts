@@ -2,24 +2,42 @@ import { debug, fatal, trace } from "../../logger";
 import { Base } from "..";
 import { createHash } from "node:crypto";
 
+type Status = "OFF" | "REPLAY" | "ON";
+
+interface CacheProfileOffData {
+  liveStatus: "OFF";
+}
+
+interface CacheProfileReplayData {
+  liveStatus: "REPLAY";
+}
+
+interface CacheProfileOnData {
+  liveStatus: "ON";
+  stream: {
+    baseSteamInfoList: {
+      sCdnType: keyof typeof cdn;
+      sStreamName: string;
+      sFlvUrl: string;
+      sFlvAntiCode: string;
+      sFlvUrlSuffix: string;
+      sHlsUrl: string;
+      sHlsAntiCode: string;
+      sHlsUrlSuffix: string;
+      newCFlvAntiCode: string;
+    }[];
+  };
+}
+
+type CacheProfileData =
+  | CacheProfileOffData
+  | CacheProfileReplayData
+  | CacheProfileOnData;
+
 interface CacheProfile {
   status: number;
   message: string;
-  data: {
-    liveStatus: string;
-    stream: {
-      baseSteamInfoList: {
-        sCdnType: keyof typeof cdn;
-        sStreamName: string;
-        sFlvUrl: string;
-        sFlvAntiCode: string;
-        sFlvUrlSuffix: string;
-        sHlsUrl: string;
-        sHlsAntiCode: string;
-        sHlsUrlSuffix: string;
-        newCFlvAntiCode: string;
-      }[];
-    };
+  data: CacheProfileData & {
     liveData: {
       nick: string;
       gameFullName: string;
@@ -91,17 +109,27 @@ export class Huya extends Base {
     );
     const profile: CacheProfile = JSON.parse(resp);
     if (profile.status !== 200) {
-      throw Error(profile.message);
-    }
-
-    if (profile.data.liveStatus === "REPLAY") {
-      fatal("此间正在重播，本程序不解析重播视频源");
+      fatal(profile.message);
     }
 
     const {
+      liveStatus,
       liveData: { nick, gameFullName, introduction },
-      stream: { baseSteamInfoList },
     } = profile.data;
+
+    debug("房间状态：", liveStatus);
+
+    if (liveStatus === "REPLAY") {
+      fatal("此间正在重播，本程序不解析重播视频源");
+      return;
+    }
+
+    if (liveStatus === "OFF") {
+      fatal("此房间未开播");
+      return;
+    }
+
+    const { baseSteamInfoList } = profile.data.stream;
 
     const streamInfo = {
       title: `${gameFullName}-${nick}: ${introduction}`,
