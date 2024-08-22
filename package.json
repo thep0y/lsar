@@ -18,8 +18,7 @@
     "lsar": "dist/main.js"
   },
   "dependencies": {
-    "commander": "^12.1.0",
-    "superagent": "^10.0.2"
+    "commander": "^12.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.5.0",
@@ -29,7 +28,5 @@
     "typescript": "^5.5.4",
     "uglify-js": "^3.19.2"
   },
-  "files": [
-    "dist"
-  ]
+  "files": ["dist"]
 }

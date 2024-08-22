@@ -1,8 +1,7 @@
 import { debug, fatal, trace } from "../../logger";
 import { Base } from "..";
 import { createHash } from "node:crypto";
-
-type Status = "OFF" | "REPLAY" | "ON";
+import { info } from "node:console";
 
 interface CacheProfileOffData {
   liveStatus: "OFF";
@@ -93,10 +92,15 @@ export class Huya extends Base {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
     });
 
+    const html = await resp.text();
+
     const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
-    const streamStr = ptn.exec(resp)![1];
+    const streamStr = ptn.exec(html)![1];
     const stream = JSON.parse(streamStr);
-    return stream.data[0].gameLiveInfo.profileRoom as string;
+    const roomID = stream.data[0].gameLiveInfo.profileRoom as string;
+    info("真实房间 id：", roomID);
+
+    return roomID;
   }
 
   private async getRoomProfile(roomID: string) {
@@ -107,9 +111,9 @@ export class Huya extends Base {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
       },
     );
-    const profile: CacheProfile = JSON.parse(resp);
+    const profile: CacheProfile = await resp.json();
     if (profile.status !== 200) {
-      fatal(profile.message);
+      return fatal(profile.message);
     }
 
     const {
@@ -120,13 +124,11 @@ export class Huya extends Base {
     debug("房间状态：", liveStatus);
 
     if (liveStatus === "REPLAY") {
-      fatal("此间正在重播，本程序不解析重播视频源");
-      return;
+      return fatal("此间正在重播，本程序不解析重播视频源");
     }
 
     if (liveStatus === "OFF") {
-      fatal("此房间未开播");
-      return;
+      return fatal("此房间未开播");
     }
 
     const { baseSteamInfoList } = profile.data.stream;
@@ -173,8 +175,8 @@ export class Huya extends Base {
       data: {},
     };
 
-    const resp = await this.post(url, JSON.stringify(json), "json");
-    const obj = JSON.parse(resp) as { data: { uid: string } };
+    const resp = await this.post(url, json, "json");
+    const obj = (await resp.json()) as { data: { uid: string } };
 
     return obj.data.uid;
   }

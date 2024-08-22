@@ -58,14 +58,14 @@ export class Douyu extends Base {
     let resp = "";
     if (this.isPost) {
       url = `https://www.douyu.com/lapi/live/getH5Play/${this.finalRoomID}`;
-      resp = await this.post(url, params);
+      resp = await (await this.post(url, params)).text();
       if (!resp) {
         warn("POST 请求未功能获得响应，更换 GET 请求重试");
         return null;
       }
     } else {
       url = `https://playweb.douyu.com/lapi/live/getH5Play/${this.finalRoomID}?${params}`;
-      resp = await this.get(url);
+      resp = await (await this.get(url)).text();
       if (!resp) {
         warn("GET 请求未功能获得响应，更换 POST 请求重试");
         return null;
@@ -210,7 +210,9 @@ export class Douyu extends Base {
 
   private async getRoomPage() {
     debug("当前房间链接：", this.roomURL);
-    return await this.get(this.roomURL);
+
+    const resp = await this.get(this.roomURL);
+    return resp.text();
   }
 
   private async getMobileStream(params: string): Promise<string | undefined> {
@@ -220,7 +222,7 @@ export class Douyu extends Base {
       `${params}&rid=${String(this.finalRoomID)}&rate=-1`,
     );
 
-    const mr = JSON.parse(resp) as MobileResponse;
+    const mr = (await resp.json()) as MobileResponse;
 
     if (mr.error !== 0) {
       error("获取手机播放流出错：", mr.msg);

@@ -79,7 +79,7 @@ interface Arg {
 export class Logger {
   private color: Color;
   private addDate = false;
-  private level: LoggerLevel;
+  readonly level: LoggerLevel;
   private prefixes: Record<LoggerLevel, string>;
   private maxLength: number | undefined = undefined;
 

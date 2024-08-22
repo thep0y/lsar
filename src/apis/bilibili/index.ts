@@ -75,10 +75,11 @@ export class Bilibili extends Base {
       DNT: "1",
       "Sec-GPC": "1",
     });
+    const html = await res.text();
 
-    let findResult = res.match(/"defaultRoomId":"(\d+)"/);
+    let findResult = html.match(/"defaultRoomId":"(\d+)"/);
     if (!findResult) {
-      findResult = res.match(/"roomid":(\d+)/);
+      findResult = html.match(/"roomid":(\d+)/);
     }
 
     if (!findResult) throw Error("未找到房间 id");
@@ -92,7 +93,7 @@ export class Bilibili extends Base {
     }
 
     const res = await this.get(this.roomURL);
-    const body = JSON.parse(res) as Response;
+    const body = (await res.json()) as Response;
     if (body.code !== 0) {
       fatal(body.message);
     }

@@ -1,11 +1,4 @@
-import { get, post, type SuperAgentRequest } from "superagent";
-import {
-  trace,
-  debug,
-  error,
-  fatal,
-  defaultColor as color,
-} from "../logger/logger";
+import { debug, fatal, defaultColor as color } from "../logger/logger";
 
 export abstract class Base {
   roomID: number;
@@ -19,74 +12,65 @@ export abstract class Base {
 
   abstract printLiveLink(): Promise<void>;
 
-  //async json<T extends object>(req: SuperAgentRequest): Promise<T> {
-  //  try {
-  //    const resp = await req;
-  //
-  //    const respHeader = JSON.stringify(resp.headers);
-  //    trace("响应头", respHeader);
-  //
-  //    if (resp.statusCode === 200) {
-  //      debug("响应成功，状态码 200");
-  //      trace("响应体：", resp.text);
-  //    }
-  //
-  //    return fatal("状态码不对", resp.statusCode);
-  //  } catch (e) {
-  //    error("请求出错", (e as Error).message);
-  //    return "";
-  //  }
-  //}
+  async json<T extends object>(url: string, options: RequestInit): Promise<T> {
+    const response = await this.request(url, options);
+    return response.json();
+  }
 
-  async request(req: SuperAgentRequest): Promise<string> {
+  async text(url: string, options: RequestInit): Promise<string> {
+    const response = await this.request(url, options);
+    return response.text();
+  }
+
+  async request(url: string, options: RequestInit): Promise<Response> {
     try {
-      const resp = await req;
+      const response = await fetch(url, options);
 
-      const respHeader = JSON.stringify(resp.headers);
-      trace("响应头", respHeader);
-
-      if (resp.statusCode === 200) {
-        debug("响应成功，状态码 200");
-        trace("响应体：", resp.text);
-        return resp.text;
+      if (!response.ok) {
+        throw new Error(`状态码异常: ${response.status}`);
       }
 
-      return fatal("状态码不对", resp.statusCode);
+      return response;
     } catch (e) {
-      error("请求出错", (e as Error).message);
-      return "";
+      return fatal("请求出错", (e as Error).message);
     }
   }
 
-  async get(url: string, headers?: { [key: string]: string }): Promise<string> {
+  async get(
+    url: string,
+    headers?: { [key: string]: string },
+  ): Promise<Response> {
     debug("GET 正在访问的链接：", url);
 
-    let req = get(url);
-    if (headers) {
-      for (const k in headers) {
-        req = req.set(k, headers[k]);
-      }
-    }
+    const options: RequestInit = {
+      method: "GET",
+      headers: headers || {},
+    };
 
-    return await this.request(
-      req.timeout({
-        response: 5000,
-        deadline: 60000,
-      }),
-    );
+    return await this.request(url, options);
   }
 
-  async post(url: string, params: string, type = "form"): Promise<string> {
-    debug("POST 正在访问的链接：", url, "使用的参数", params);
-    return await this.request(
-      post(url)
-        .timeout({
-          response: 5000,
-          deadline: 60000,
-        })
-        .type(type)
-        .send(params),
-    );
+  static ContentType = {
+    json: "application/json",
+    form: "application/x-www-form-urlencoded",
+  };
+
+  async post(
+    url: string,
+    body: string | object,
+    contentType: keyof typeof Base.ContentType = "form",
+  ): Promise<Response> {
+    debug("POST 正在访问的链接：", url, "使用的参数", body);
+
+    const options: RequestInit = {
+      method: "POST",
+      headers: {
+        "Content-Type": Base.ContentType[contentType],
+      },
+      body: typeof body === "string" ? body : JSON.stringify(body),
+    };
+
+    return await this.request(url, options);
   }
 }
 
@@ -113,3 +97,4 @@ export const isType = <T extends object>(
 
 export * from "./douyu";
 export * from "./bilibili";
+export * from "./huya";
