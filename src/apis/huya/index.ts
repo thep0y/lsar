@@ -1,5 +1,5 @@
 import { debug, fatal, trace } from "../../logger";
-import { Base, isType } from "..";
+import { Base } from "..";
 import { createHash } from "node:crypto";
 
 interface CacheProfile {
@@ -36,43 +36,6 @@ const cdn = {
   HS: "火山",
   WS: "网宿",
 } as const;
-
-interface BaseStream {
-  sStreamName: string;
-  sCdnType: keyof typeof cdn;
-}
-
-interface Flv extends BaseStream {
-  sFlvUrl: string;
-  sFlvUrlSuffix: string;
-  sFlvAntiCode: string;
-}
-
-interface Hls extends BaseStream {
-  sHlsUrl: string;
-  sHlsUrlSuffix: string;
-  sHlsAntiCode: string;
-}
-
-type RoomStream = Flv | Hls;
-
-interface RoomInfo {
-  roomInfo?: {
-    eLiveStatus: number;
-    tLiveInfo: {
-      lProfileRoom: number;
-      sRoomName: string;
-      tLiveStreamInfo: {
-        vStreamInfo: {
-          value: RoomStream[];
-        };
-      };
-    };
-  };
-  roomProfile?: {
-    liveLineUrl: string;
-  };
-}
 
 interface StreamResult {
   title: string;
@@ -171,32 +134,6 @@ export class Huya extends Base {
     return streamInfo;
   }
 
-  private async getRoomInfo() {
-    let url: string;
-    if (this.roomID) {
-      url = this.roomURL;
-    } else {
-      url = this.pageURL;
-    }
-
-    trace("获取直播间页面信息", url);
-    const resp = await this.get(url, {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-    });
-
-    const ptn = /<script> window.HNF_GLOBAL_INIT = (.*) <\/script>/;
-    //const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
-    const infoStr = ptn.exec(resp)![1];
-    //const infoStr = ptn.exec(resp)![1];
-
-    debug("页面信息中获取房间详细信息", infoStr);
-
-    const info = JSON.parse(infoStr) as RoomInfo;
-
-    return info;
-  }
-
   private async getAnonymousUid() {
     trace("获取 uid");
     const url = "https://udblgn.huya.com/web/anonymousLogin";
@@ -265,27 +202,6 @@ export class Huya extends Base {
       .join("&");
 
     return queryString;
-  }
-
-  private async getLives(ri: RoomInfo) {
-    const streamInfo = { flv: {}, hls: {} } as StreamResult;
-    const uid = await this.getAnonymousUid();
-
-    for (const s of ri.roomInfo!.tLiveInfo.tLiveStreamInfo.vStreamInfo.value) {
-      if (isType<Flv>("sFlvUrl", s)) {
-        const anticode = this.parseAnticode(s.sFlvAntiCode, uid, s.sStreamName);
-        const url = `${s.sFlvUrl}/${s.sStreamName}.${s.sFlvUrlSuffix}?${anticode}`;
-        streamInfo.flv[cdn[s.sCdnType]] = url;
-      }
-
-      if (isType<Hls>("sHlsUrl", s)) {
-        const anticode = this.parseAnticode(s.sHlsAntiCode, uid, s.sStreamName);
-        const url = `${s.sHlsUrl}/${s.sStreamName}.${s.sHlsUrlSuffix}?${anticode}`;
-        streamInfo.hls[cdn[s.sCdnType]] = url;
-      }
-    }
-
-    return streamInfo;
   }
 
   async printLiveLink(): Promise<void> {
