@@ -1,6 +1,6 @@
 {
   "name": "lsar",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Live Source Address Resolution",
   "main": "./dist/main.js",
   "repository": {
