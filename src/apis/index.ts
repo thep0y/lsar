@@ -19,6 +19,25 @@ export abstract class Base {
 
   abstract printLiveLink(): Promise<void>;
 
+  //async json<T extends object>(req: SuperAgentRequest): Promise<T> {
+  //  try {
+  //    const resp = await req;
+  //
+  //    const respHeader = JSON.stringify(resp.headers);
+  //    trace("响应头", respHeader);
+  //
+  //    if (resp.statusCode === 200) {
+  //      debug("响应成功，状态码 200");
+  //      trace("响应体：", resp.text);
+  //    }
+  //
+  //    return fatal("状态码不对", resp.statusCode);
+  //  } catch (e) {
+  //    error("请求出错", (e as Error).message);
+  //    return "";
+  //  }
+  //}
+
   async request(req: SuperAgentRequest): Promise<string> {
     try {
       const resp = await req;

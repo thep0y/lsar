@@ -1,7 +1,32 @@
 import { debug, fatal, trace } from "../../logger";
 import { Base, isType } from "..";
 import { createHash } from "node:crypto";
-import { error } from "node:console";
+
+interface CacheProfile {
+  status: number;
+  message: string;
+  data: {
+    liveStatus: string;
+    stream: {
+      baseSteamInfoList: {
+        sCdnType: keyof typeof cdn;
+        sStreamName: string;
+        sFlvUrl: string;
+        sFlvAntiCode: string;
+        sFlvUrlSuffix: string;
+        sHlsUrl: string;
+        sHlsAntiCode: string;
+        sHlsUrlSuffix: string;
+        newCFlvAntiCode: string;
+      }[];
+    };
+    liveData: {
+      nick: string;
+      gameFullName: string;
+      introduction: string;
+    };
+  };
+}
 
 const cdn = {
   AL: "阿里",
@@ -50,6 +75,7 @@ interface RoomInfo {
 }
 
 interface StreamResult {
+  title: string;
   flv: Record<string, string>;
   hls: Record<string, string>;
 }
@@ -72,6 +98,79 @@ export class Huya extends Base {
     return this.baseURL + this.roomID.toString();
   }
 
+  private async getFinalRoomID() {
+    let url: string;
+    if (this.roomID) {
+      url = this.roomURL;
+    } else {
+      url = this.pageURL;
+    }
+
+    trace("获取直播间页面信息", url);
+    const resp = await this.get(url, {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    });
+
+    const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
+    const streamStr = ptn.exec(resp)![1];
+    const stream = JSON.parse(streamStr);
+    return stream.data[0].gameLiveInfo.profileRoom as string;
+  }
+
+  private async getRoomProfile(roomID: string) {
+    const resp = await this.get(
+      `https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=${roomID}`,
+      {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+      },
+    );
+    const profile: CacheProfile = JSON.parse(resp);
+    if (profile.status !== 200) {
+      throw Error(profile.message);
+    }
+
+    if (profile.data.liveStatus === "REPLAY") {
+      fatal("此间正在重播，本程序不解析重播视频源");
+    }
+
+    const {
+      liveData: { nick, gameFullName, introduction },
+      stream: { baseSteamInfoList },
+    } = profile.data;
+
+    const streamInfo = {
+      title: `${gameFullName}-${nick}: ${introduction}`,
+      flv: {},
+      hls: {},
+    } as StreamResult;
+
+    const uid = await this.getAnonymousUid();
+    for (const item of baseSteamInfoList) {
+      if (item.sFlvAntiCode && item.sFlvAntiCode.length > 0) {
+        const anticode = this.parseAnticode(
+          item.sFlvAntiCode,
+          uid,
+          item.sStreamName,
+        );
+        const url = `${item.sFlvUrl}/${item.sStreamName}.${item.sFlvUrlSuffix}?${anticode}`;
+        streamInfo.flv[cdn[item.sCdnType]] = url;
+      }
+      if (item.sHlsAntiCode && item.sHlsAntiCode.length > 0) {
+        const anticode = this.parseAnticode(
+          item.sHlsAntiCode,
+          uid,
+          item.sStreamName,
+        );
+        const url = `${item.sHlsUrl}/${item.sStreamName}.${item.sHlsUrlSuffix}?${anticode}`;
+        streamInfo.hls[cdn[item.sCdnType]] = url;
+      }
+    }
+
+    return streamInfo;
+  }
+
   private async getRoomInfo() {
     let url: string;
     if (this.roomID) {
@@ -82,14 +181,14 @@ export class Huya extends Base {
 
     trace("获取直播间页面信息", url);
     const resp = await this.get(url, {
-      "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent":
-        "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)" +
-        " AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36 ",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
     });
 
     const ptn = /<script> window.HNF_GLOBAL_INIT = (.*) <\/script>/;
+    //const ptn = /stream: (\{.+"iFrameRate":\d+\})/;
     const infoStr = ptn.exec(resp)![1];
+    //const infoStr = ptn.exec(resp)![1];
 
     debug("页面信息中获取房间详细信息", infoStr);
 
@@ -190,29 +289,11 @@ export class Huya extends Base {
   }
 
   async printLiveLink(): Promise<void> {
-    const ri = await this.getRoomInfo();
+    const roomID = await this.getFinalRoomID();
+    const stream = await this.getRoomProfile(roomID);
 
-    debug("房间信息", JSON.stringify(ri));
-
-    if (ri.roomInfo === undefined) {
-      return fatal("此房间未开播", this.roomID);
-    }
-
-    if (ri.roomInfo.eLiveStatus === 2) {
-      const stream = await this.getLives(ri);
-      console.log(
-        "解析完成，任选一条下面的播放源，卡顿时可尝试切换其他播放源\n",
-      );
-      console.log("房间名:", ri.roomInfo.tLiveInfo.sRoomName);
-      console.log(stream);
-      return;
-    }
-
-    if (ri.roomInfo.eLiveStatus === 3) {
-      error("该房间正在回放历史直播，本程序不解析历史直播地址");
-      return;
-    }
-
-    fatal("此房间未开播", this.roomID);
+    console.log("解析完成，任选一条下面的播放源，卡顿时可尝试切换其他播放源\n");
+    console.log(stream);
+    return;
   }
 }

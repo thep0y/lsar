@@ -214,7 +214,7 @@ export class Logger {
   }
 }
 
-export const log = new Logger({});
+export const log = new Logger({ maxLength: 200 });
 
 export const trace = (...msgs: MsgArg[]) => log.trace(...msgs);
 export const debug = (...msgs: MsgArg[]) => log.debug(...msgs);
