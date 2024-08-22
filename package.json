@@ -18,16 +18,16 @@
     "lsar": "dist/main.js"
   },
   "dependencies": {
-    "commander": "^11.1.0",
-    "superagent": "^8.1.2"
+    "commander": "^12.1.0",
+    "superagent": "^10.0.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.12",
-    "@types/superagent": "4.1.18",
+    "@types/node": "^22.5.0",
+    "@types/superagent": "8.1.8",
     "@types/uglify-js": "^3.17.5",
     "cross-env": "^7.0.3",
     "typescript": "^5.5.4",
-    "uglify-js": "^3.19.0"
+    "uglify-js": "^3.19.2"
   },
   "files": [
     "dist"
