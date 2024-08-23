@@ -1,8 +1,9 @@
-import { defaultColor as color, info, fatal } from "../../logger";
+import { defaultColor as color, info, fatal, debug } from "../../logger";
 import { Base } from "..";
 
 interface CDNItem {
   host: string;
+  extra: string;
 }
 
 interface CodecItem {
@@ -10,12 +11,6 @@ interface CodecItem {
   base_url: string;
   current_qn: number;
   url_info: CDNItem[];
-}
-
-enum Format {
-  fmp4 = "fmp4",
-  ts = "ts",
-  flv = "flv",
 }
 
 interface FormatItem {
@@ -39,12 +34,32 @@ interface Response {
   };
 }
 
+interface VerifyFailedResult {
+  code: -101;
+  message: string;
+  data: {
+    isLogin: false;
+  };
+}
+
+interface VerifySuccessResult {
+  code: 0;
+  message: string;
+  data: {
+    isLogin: boolean;
+    uname: string;
+  };
+}
+
+type VerifyResult = VerifyFailedResult | VerifySuccessResult;
+
 export class Bilibili extends Base {
   baseURL =
     "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8&dolby=5&panorama=1&room_id=";
   private readonly pageURL: string = "";
+  private cookie: string;
 
-  constructor(roomID: number, url = "") {
+  constructor(cookie: string, roomID?: number, url = "") {
     super(roomID ? roomID : 0);
 
     if (!roomID && !url) {
@@ -52,10 +67,25 @@ export class Bilibili extends Base {
     }
 
     this.pageURL = url;
+    this.cookie = cookie;
   }
 
   get roomURL(): string {
     return this.baseURL + this.roomID.toString();
+  }
+
+  private async verifyCookie() {
+    debug("验证 cookie");
+    const url = "https://api.bilibili.com/x/web-interface/nav";
+    const resp = await this.get(url, { cookie: this.cookie });
+    const data: VerifyResult = await resp.json();
+    if (data.code !== 0) {
+      return fatal(data.message);
+    }
+
+    const { uname } = data.data;
+
+    return uname;
   }
 
   private async parseRoomID() {
@@ -92,41 +122,32 @@ export class Bilibili extends Base {
       this.roomID = await this.parseRoomID();
     }
 
-    const res = await this.get(this.roomURL);
+    const res = await this.get(this.roomURL, { cookie: this.cookie });
     const body = (await res.json()) as Response;
     if (body.code !== 0) {
       fatal(body.message);
     }
 
-    info("已获取到正确响应", res);
+    info("已获取到正确响应");
 
     return body;
   }
 
   async printLiveLink(): Promise<void> {
+    const username = await this.verifyCookie();
+    info("验证成功，登录的用户:", username);
+
     const res = await this.getRoomInfo();
 
     console.log("\n选择下面的任意一条链接，播放失败换其他链接试试：\n");
 
     for (const s of res.data.playurl_info.playurl.stream) {
       for (const fmt of s.format) {
-        if (fmt.format_name !== Format.flv) {
-          for (const c of fmt.codec) {
-            for (const cdn of c.url_info) {
-              if (cdn.host.startsWith("https://d1--cn-")) {
-                info('跳过 "https://d1--cn-" 开头的链接');
-                return;
-              }
-
-              const url = cdn.host + c.base_url;
-              console.log(
-                color.gray(url.indexOf("?") ? url.split("?", 2)[0] : url),
-                "\n",
-              );
-            }
+        for (const c of fmt.codec) {
+          for (const cdn of c.url_info) {
+            const url = cdn.host + c.base_url + cdn.extra;
+            console.log(color.gray(url), "\n");
           }
-        } else {
-          info("跳过 flv");
         }
       }
     }

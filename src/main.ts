@@ -38,13 +38,22 @@ interface BiliArg {
 program
   .command("bili")
   .description("解析B站直播源。\n可以使用房间ID或房间链接作为传入参数。")
-  .option("-r, --roomID <roomID>", "目标房间号", myParseInt, 0)
-  .option("-u, --url <pageURL>", "房间页面链接")
-  .action((arg: BiliArg) => {
-    const c = new Bilibili(arg.roomID, arg.url);
+  .argument("<cookie>", "B站登录后的 cookie，一定要用单引号或双引号包裹。")
+  .option("-r, --roomID <roomID>", "目标房间号", myParseInt)
+  .option("-u, --url <pageURL>", "房间页面链接。")
+  .action((cookie: string, arg: BiliArg) => {
+    const c = new Bilibili(cookie, arg.roomID, arg.url);
     c.printLiveLink().catch((e) => {
       console.log(e);
     });
+  })
+  .exitOverride((e) => {
+    if (
+      e.code === "commander.missingArgument" &&
+      e.message.indexOf("'cookie'") > -1
+    ) {
+      return fatal("必须传入 cookie");
+    }
   });
 
 type HuyaArg = BiliArg;
