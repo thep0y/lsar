@@ -98,3 +98,4 @@ export const isType = <T extends object>(
 export * from "./douyu";
 export * from "./bilibili";
 export * from "./huya";
+export * from "./douyin";

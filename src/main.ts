@@ -1,6 +1,5 @@
 import { Command, InvalidArgumentError } from "commander";
-import { Douyu, Bilibili } from "./apis";
-import { Huya } from "./apis/huya";
+import { Douyu, Bilibili, Huya, Douyin } from "./apis";
 import { fatal } from "./logger";
 
 const program = new Command();
@@ -63,6 +62,19 @@ program
     h.printLiveLink().catch((e) => {
       console.log(e);
     });
+  });
+
+program
+  .command("douyin")
+  .description("解析抖音直播源")
+  .argument("<roomID>", "目标房间号", myParseInt)
+  .action((roomID: number) => {
+    const c = new Douyin(roomID);
+    c.printLiveLink()
+      .then()
+      .catch((e) => {
+        console.log(e);
+      });
   });
 
 program.parse(process.argv);
