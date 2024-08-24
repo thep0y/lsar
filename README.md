@@ -73,9 +73,28 @@ yarn global bin
 
 #### 使用说明
 
-编译安装后在 npm 的全局 bin 目录中会有一个`lsar`命令，传入房间号即可解析出直播源：
+各直播平台的命令见下面示例。
 
-![截屏2023-07-31 11.37.55](doc/images/sample.png)
+- 斗鱼
+  ```bash
+  lasr douyu 100
+  ```
+- 虎牙。
+  使用链接`-u`时一定要用**英文**单引号或双引号将链接包裹住，否则可能报错。
+  ```bash
+  lsar huya -r 100
+  lsar huya -u 'https://www.huya.com/06016sask?&curpage=%E9%BB%91%E7%A5%9E%E8%AF%9D%EF%BC%9A%E6%82%9F%E7%A9%BA%E5%93%81%E7%B1%BB%E9%A1%B5&curlocation=%E5%85%A8%E9%83%A8%2F1'
+  ```
+- B 站
+  使入 cookie 和使用链接`-u`时一定要用**英文**单引号或双引号将链接包裹住，否则可能报错。
+  ```bash
+  lsar bili -r 100 'buvid3=9E0E75DA-AB78-00DC-B72A-9D56282337A829879infoc; b_nut=1723464629; ... theme_style=light'
+  lsar bili -u 'https://live.bilibili.com/30632872?session_id=44ed74815a4f65086b14a6472566c873_DBCADB56-218B-4E43-872D-39ECFCF95BAD&launch_id=1000216&live_from=71001' 'buvid3=9E0E75DA-AB78-00DC-B72A-9D56282337A829879infoc; b_nut=1723464629; ... theme_style=light'
+  ```
+- 抖音
+  ```bash
+  lsar douyin 100
+  ```
 
 ## 问题反馈
 
