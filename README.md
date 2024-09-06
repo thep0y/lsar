@@ -1,5 +1,7 @@
 # LSAR
 
+考虑到用户多为小白，无任何 node 环境搭建及 npm 使用经验，故在本项目基础上创建一同名的另一个图形化项目 https://github.com/alley-rs/lsar，本项目不再维护。
+
 ## 介绍
 
 Live Source Address Resolution.
